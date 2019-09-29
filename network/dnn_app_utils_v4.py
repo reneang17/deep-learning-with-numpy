@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
-from activation_functions import *
+from activations import *
 from loss_function import cross_entropy
 
 
@@ -195,11 +195,11 @@ def linear_activation_backward(dA, cache, activation):
     linear_cache, Z = cache
     
     if activation == "relu":
-        dZ = dA * relu_backward( Z)
+        dZ = dA * relu_backward(Z)
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
         
     elif activation == "sigmoid":
-        dZ = dA *sigmoid_backward(Z)
+        dZ = dA * sigmoid_backward(Z)
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
     
     return dA_prev, dW, db

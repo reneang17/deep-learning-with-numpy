@@ -1,56 +1,26 @@
 import numpy as np
 
-
-def sigmoid(Z):
+class Sigmoid():
     """
-    Implements the sigmoid activation in numpy
-    
-    Arguments:
-    Z -- numpy array of any shape
-    
-    Returns:
-    A -- output of sigmoid(z), same shape as Z
+    Fordward/backward sigmoid propagation
+    in numpy
     """
     
-    A = 1/(1+np.exp(-Z))
-    
-    return A
+    def __call__(self, Z):
+        return 1 / (1 + np.exp(-Z))
 
-def relu(Z):
+    def gradient(self, A):
+        return self.__call__(A) * (1 - self.__call__(A))
+
+class Relu():
     """
-    Implement the RELU function.
-
-    Arguments:
-    Z -- Output of the linear layer, of any shape
-
-    Returns:
-    A -- Post-activation parameter, of the same shape as Z
+    Fordward/backward ReLU propagation
+    in numpy
     """
-    
-    A = np.maximum(0,Z)
-    
-    assert(A.shape == Z.shape)
-    
-    return A
+    def __call__(self, Z):
+        return np.where(Z >= 0, Z, 0)
+
+    def gradient(self, Z):
+        return np.where(Z >= 0, 1, 0)
 
 
-def relu_backward(Z):
-    """
-    Implement the backward propagation for a single RELU unit.
-
-    """
-    
-    return np.where(Z >= 0, 1, 0)
-
-def sigmoid_backward(Z):
-    """
-    Implement the backward propagation for a single SIGMOID unit.
-
-    """
-    
-    s = sigmoid(Z)
-    s =  s * (1-s)
-    
-    assert (s.shape == Z.shape)
-    
-    return s

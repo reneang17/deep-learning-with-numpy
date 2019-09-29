@@ -16,8 +16,9 @@ class NeuralNetwork():
     validation: tuple
         A tuple containing validation data and labels (X, y)
     """
-    def __init__(self):
+    def __init__(self, loss):
         self.layers = []  
+        self.loss_function = loss()
 
     def add(self, layer):
         """ Method which adds a layer to the neural network """
@@ -32,3 +33,33 @@ class NeuralNetwork():
         
         # Add layer to the network
         self.layers.append(layer)
+        
+        
+
+    def train_on_batch(self, X, y):
+        """ Single gradient update over one batch of samples """
+        y_pred = self._forward_pass(X)
+        loss = np.mean(self.loss_function.loss(y, y_pred))
+        acc = self.loss_function.acc(y, y_pred)
+        # Calculate the gradient of the loss function wrt y_pred
+        loss_grad = self.loss_function.gradient(y, y_pred)
+        # Backpropagate. Update weights
+        self._backward_pass(loss_grad=loss_grad)
+
+        return loss, acc
+    
+    
+    def _forward_pass(self, X, training=True):
+        """ Calculate the output of the NN """
+        layer_output = X
+        for layer in self.layers:
+            layer_output = layer.forward_pass(layer_output, training)
+
+        return layer_output
+
+    def _backward_pass(self, loss_grad):
+        """ Propagate the gradient 'backwards' and update the weights in each layer """
+        for layer in reversed(self.layers):
+            loss_grad = layer.backward_pass(loss_grad)
+            
+            

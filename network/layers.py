@@ -3,8 +3,7 @@ import math
 import numpy as np
 import copy
 
-from activation_functions import Sigmoid, ReLU, SoftPlus, LeakyReLU
-from activation_functions import TanH, ELU, SELU, Softmax
+from activation_functions import Sigmoid, Relu
 
 
 
@@ -39,16 +38,7 @@ class Dense(Layer):
         
         self.W = None
         self.b = None
-        self.dW = None
-        self.db = None        
         
-        self.A = None
-        self.Z = None
-        self.dA = None
-        self.dZ = None
-        
-    def output_shape(self):
-        return (self.n_units,)
 
     def initialize(self):
         # Initialize the weights
@@ -61,6 +51,9 @@ class Dense(Layer):
         
         assert(self.W.shape == (self.n_units, self.input_shape[0]))
         assert(self.b.shape == (self.n_units, 1))
+
+    def output_shape(self):
+        return (self.n_units,)
         
     
     def forward_linear(self, A_prev, training=True): #what is training=True for?
@@ -70,5 +63,56 @@ class Dense(Layer):
         
         assert(self.Z.shape == (self.W.shape[0], A_prev.shape[1]))
         return self.Z
+    
+    def backward_pass(self, dZ):
+        # Save weights used during forwards pass
+        W = self.W
+
+        if self.trainable:
+            # Calculate gradient w.r.t layer weights
+            dW = np.dot(dZ, A_prev.T) / dZ.shape[1]
+            db = np.sum(dZ, axis=1, keepdims=True) / dZ.shape[1]
+
+            # Update the layer weights
+            learning_rate = 0.0075
+            self.W = self.W - learning_rate * dW 
+            self.b = self.b - learning_rate * db
+
+        dA_prev = np.dot(W.T, dZ)
+        
+        return dA_prev
+
         
         
+activation_functions = {
+    'sigmoid': Sigmoid,
+    'relu': Relu    
+}
+
+class Activation(Layer):
+    """A layer that applies an activation operation to the input.
+    Parameters:
+    -----------
+    name: string
+        The name of the activation function that will be used.
+    """
+
+    def __init__(self, name):
+        self.activation_name = name
+        self.act_func = activation_functions[name]()
+        self.trainable = True
+    
+    def output_shape(self):
+        return self.input_shape
+
+    def forward_pass(self, Z, training=True):
+        self.layer_input = Z
+        return self.act_func(Z)
+
+    def backward_pass(self, dA):
+        dact = self.activation_func.gradient(self.layer_input)
+        dZ = dA * dact
+        assert(dZ.shape == dA.shape)
+        assert(dZ.shape == dact.shape)
+        return dZ 
+
