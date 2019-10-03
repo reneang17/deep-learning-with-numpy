@@ -53,7 +53,7 @@ class NeuralNetwork():
         """ Calculate the output of the NN """
         layer_output = X
         for layer in self.layers:
-            layer_output = layer.forward_pass(layer_output, training)
+            layer_output = layer.forward(layer_output, training)
 
         return layer_output
 
