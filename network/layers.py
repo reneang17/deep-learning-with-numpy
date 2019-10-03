@@ -14,7 +14,7 @@ class Layer(object):
         pass method """
         self.input_shape = shape
 
-    def forward_linear(self, X, training):
+    def forward(self, X, training):
         """ Propogates the signal forward in the network """
         raise NotImplementedError()
 
@@ -56,7 +56,7 @@ class Dense(Layer):
         return (self.n_units,)
         
     
-    def forward_linear(self, A_prev, training=True): #what is training=True for?
+    def forward(self, A_prev, training=True): #what is training=True for?
         
         self.layer_input = A_prev
         self.Z= np.dot((self.W), A_prev) + self.b
@@ -64,7 +64,7 @@ class Dense(Layer):
         assert(self.Z.shape == (self.W.shape[0], A_prev.shape[1]))
         return self.Z
     
-    def backward_pass(self, dZ):
+    def backward(self, dZ):
         # Save weights used during forwards pass
         W = self.W
 
@@ -105,11 +105,11 @@ class Activation(Layer):
     def output_shape(self):
         return self.input_shape
 
-    def forward_pass(self, Z, training=True):
+    def forward(self, Z, training=True):
         self.layer_input = Z
         return self.act_func(Z)
 
-    def backward_pass(self, dA):
+    def backward(self, dA):
         dact = self.activation_func.gradient(self.layer_input)
         dZ = dA * dact
         assert(dZ.shape == dA.shape)
