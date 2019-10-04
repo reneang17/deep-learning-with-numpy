@@ -44,7 +44,7 @@ class NeuralNetwork():
         # Calculate the gradient of the loss function wrt y_pred
         loss_grad = self.loss_function.gradient(y, y_pred)
         # Backpropagate. Update weights
-        self._backward_pass(loss_grad=loss_grad)
+        self._backward(loss_grad=loss_grad)
 
         return loss, acc
     
@@ -60,6 +60,6 @@ class NeuralNetwork():
     def _backward(self, loss_grad):
         """ Propagate the gradient 'backwards' and update the weights in each layer """
         for layer in reversed(self.layers):
-            loss_grad = layer.backward_pass(loss_grad)
+            loss_grad = layer.backward(loss_grad)
             
             

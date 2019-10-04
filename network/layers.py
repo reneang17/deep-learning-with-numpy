@@ -67,6 +67,7 @@ class Dense(Layer):
     def backward(self, dZ):
         # Save weights used during forwards pass
         W = self.W
+        A_prev = self.layer_input
 
         if self.trainable:
             # Calculate gradient w.r.t layer weights
@@ -99,7 +100,7 @@ class Activation(Layer):
 
     def __init__(self, name):
         self.activation_name = name
-        self.act_func = activation_functions[name]()
+        self.activation_func = activation_functions[name]()
         self.trainable = True
     
     def output_shape(self):
@@ -107,7 +108,7 @@ class Activation(Layer):
 
     def forward(self, Z, training=True):
         self.layer_input = Z
-        return self.act_func(Z)
+        return self.activation_func(Z)
 
     def backward(self, dA):
         dact = self.activation_func.gradient(self.layer_input)
