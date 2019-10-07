@@ -49,20 +49,16 @@ class Dense(Layer):
         # Initialize the weights
         
         wshape = (self.n_units, self.input_shape[0])
-        bshape = (self.n_units, 1)
-        np.random.seed(3)
-        
         if self.initializer == 'normal':
-        
             lim = 1 / math.sqrt(wshape[0])
             self.W  = np.random.uniform(-lim, lim, wshape)
-            self.b = np.zeros(shape=bshape)
             
         if self.initializer == 'ng':
-            lim = 1 / math.sqrt(wshape[0])
-            self.W  = np.random.uniform(-lim, lim, wshape)
-            self.b = np.zeros(shape=bshape)
+            self.W  = np.random.randn(wshape[0], wshape[1]) / np.sqrt(wshape[1])
+                       
+        self.b = np.zeros(shape = (self.n_units, 1))
         
+        #crosschecks
         assert(self.W.shape == (self.n_units, self.input_shape[0]))
         assert(self.b.shape == (self.n_units, 1))
     

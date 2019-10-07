@@ -19,6 +19,7 @@ class NeuralNetwork():
     def __init__(self, loss):
         self.layers = []  
         self.loss_function = loss()
+        
 
         
     def add(self, layer):
