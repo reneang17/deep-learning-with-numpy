@@ -20,9 +20,10 @@ class NeuralNetwork():
         self.layers = []  
         self.loss_function = loss()
 
+        
     def add(self, layer):
         """ Method which adds a layer to the neural network """
-        # If this is not the first layer added then set the input shape
+        # If not first layer added then set the input shape
         # to the output shape of the last added layer
         if self.layers:
             layer.set_input_shape(shape=self.layers[-1].output_shape())

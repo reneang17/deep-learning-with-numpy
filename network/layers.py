@@ -30,11 +30,12 @@ class Dense(Layer):
         the number of features of the input. Must be specified if it is the first layer in
         the network.
     """
-    def __init__(self, n_units, input_shape=None):
+    def __init__(self, n_units, input_shape=None, initializer = 'normal'):
         self.layer_input = None
         self.input_shape = input_shape
         self.n_units = n_units
         self.trainable = True
+        self.initializer = initializer
         
         self.W = None
         self.b = None
@@ -46,15 +47,25 @@ class Dense(Layer):
 
     def initialize(self):
         # Initialize the weights
-        np.random.seed(3)
-        lim = 1 / math.sqrt(self.input_shape[0])
         
-        self.W  = np.random.uniform(-lim, lim, 
-                  (self.n_units, self.input_shape[0]))
-        self.b = np.zeros(shape=(self.n_units, 1))
+        wshape = (self.n_units, self.input_shape[0])
+        bshape = (self.n_units, 1)
+        np.random.seed(3)
+        
+        if self.initializer == 'normal':
+        
+            lim = 1 / math.sqrt(wshape[0])
+            self.W  = np.random.uniform(-lim, lim, wshape)
+            self.b = np.zeros(shape=bshape)
+            
+        if self.initializer == 'ng':
+            lim = 1 / math.sqrt(wshape[0])
+            self.W  = np.random.uniform(-lim, lim, wshape)
+            self.b = np.zeros(shape=bshape)
         
         assert(self.W.shape == (self.n_units, self.input_shape[0]))
         assert(self.b.shape == (self.n_units, 1))
+    
 
     def output_shape(self):
         return (self.n_units,)
