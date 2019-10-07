@@ -39,6 +39,10 @@ class Dense(Layer):
         self.W = None
         self.b = None
         
+        # For debugging
+        self.dW = None
+        self.db = None
+        
 
     def initialize(self):
         # Initialize the weights
@@ -73,6 +77,9 @@ class Dense(Layer):
             # Calculate gradient w.r.t layer weights
             dW = np.dot(dZ, A_prev.T) / dZ.shape[1]
             db = np.sum(dZ, axis=1, keepdims=True) / dZ.shape[1]
+            
+            self.dW = dW
+            self.db = db
 
             # Update the layer weights
             learning_rate = 0.0075

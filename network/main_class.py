@@ -38,7 +38,7 @@ class NeuralNetwork():
 
     def train_on_batch(self, X, y):
         """ Single gradient update over one batch of samples """
-        y_pred = self._forward_pass(X)
+        y_pred = self._forward(X)
         loss = np.mean(self.loss_function.loss(y, y_pred))
         acc = self.loss_function.acc(y, y_pred)
         # Calculate the gradient of the loss function wrt y_pred
