@@ -20,7 +20,7 @@ class NeuralNetwork():
         self.layers = []  
         self.loss_function = loss()
         
-
+    
         
     def add(self, layer):
         """ Method which adds a layer to the neural network """
