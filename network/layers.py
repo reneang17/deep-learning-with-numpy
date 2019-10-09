@@ -125,9 +125,12 @@ class Activation(Layer):
         return self.activation_func(Z)
 
     def backward(self, dA):
-        dact = self.activation_func.gradient(self.layer_input)
-        dZ = dA * dact
-        assert(dZ.shape == dA.shape)
-        assert(dZ.shape == dact.shape)
+        Z = self.layer_input
+        dact = self.activation_func.gradient(Z)        
+        assert Z.shape == dact.shape
+        
+        dZ = np.multiply(dA, dact)
+        assert(dZ.shape == (Z.shape))
+        
         return dZ 
 
