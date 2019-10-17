@@ -42,5 +42,5 @@ class CrossEntropy(Loss):
     def gradient(self, y, AL):
         # Avoid division by zero
         AL = np.clip(AL, 1e-15, 1 - 1e-15)
-        print  ((- (y / AL) + (1 - y) / (1 - AL) ).shape,'cross-function output dA')
+        #print  ((- (y / AL) + (1 - y) / (1 - AL) ).shape,'cross-function output dA')
         return - (y / AL) + (1 - y) / (1 - AL)

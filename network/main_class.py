@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import h5py
 from batcher import *
 
+import time
+from tqdm import tqdm
+
+
 
 class NeuralNetwork():
     """Neural Network.
@@ -16,9 +20,16 @@ class NeuralNetwork():
     validation: tuple
         A tuple containing validation data and labels (X, y)
     """
-    def __init__(self, loss):
+    def __init__(self, loss,validation_data=None):
         self.layers = []  
         self.loss_function = loss()
+        
+        self.errors = {"training": [], "validation": []}
+        
+        self.val_set = None
+        if validation_data:
+            X, y = validation_data
+            self.val_set = {"X": X, "y": y}
         
     
         
@@ -49,6 +60,34 @@ class NeuralNetwork():
         self._backward(loss_grad=loss_grad)
 
         return loss, acc
+    
+    
+    
+    def fit(self, X, y, n_epochs, batch_size):
+        """ Train on n_epochs """
+        
+        for _ in tqdm(range(n_epochs)):
+            time.sleep(0)
+     
+            batch_error = []
+            
+            for X_batch, y_batch in batcher(X, y, batch_size=batch_size):
+                
+                loss, _ = self.train_on_batch(X_batch, y_batch)
+                batch_error.append(loss)
+
+            self.errors["training"].append(np.mean(batch_error))
+
+            if self.val_set is not None:
+                val_loss, _ = self.test_on_batch(self.val_set["X"], self.val_set["y"])
+                self.errors["validation"].append(val_loss)
+
+        return self.errors["training"], self.errors["validation"]
+    
+    def predict(self, X):
+        """ Use the trained model to predict labels of X """
+        return self._forward(X, training=False)
+    
     
     
     def _forward(self, X, training=True):
