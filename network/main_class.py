@@ -65,13 +65,15 @@ class NeuralNetwork():
     
     def fit(self, X, y, n_epochs, batch_size):
         """ Train on n_epochs """
-        
+
         for _ in tqdm(range(n_epochs)):
             time.sleep(0)
      
             batch_error = []
+
+            batch_iterator =  Batcher(X, y, batch_size=batch_size)
             
-            for X_batch, y_batch in batcher(X, y, batch_size=batch_size):
+            for X_batch, y_batch in batch_iterator:
                 
                 loss, _ = self.train_on_batch(X_batch, y_batch)
                 batch_error.append(loss)
