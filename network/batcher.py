@@ -9,3 +9,15 @@ def batcher(X, y=None, batch_size=64):
             yield X[:, start:end], y[start:end]
         else:
             yield X[:, start:end]
+
+
+
+class Batcher:
+    def __init__(self, X, y=None, batch_size=64):
+        self.X = X
+        self.y = y
+        self.batch_size = batch_size
+
+    def __iter__(self):
+        return batcher(self.X, self.y, self.batch_size)
+
