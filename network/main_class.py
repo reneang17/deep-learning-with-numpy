@@ -50,7 +50,7 @@ class NeuralNetwork():
         
 
     def train_on_batch(self, X, y):
-        """ Single gradient update over one batch of samples """
+        """ Forward/backward on batch """
         y_pred = self._forward(X)
         loss = np.mean(self.loss_function.loss(y, y_pred))
         acc = self.loss_function.acc(y, y_pred)
@@ -61,7 +61,13 @@ class NeuralNetwork():
 
         return loss, acc
     
-    
+    def test_on_batch(self, X, y):
+        """ Test on batch """
+        y_pred = self._forward(X, training=False)
+        loss = np.mean(self.loss_function.loss(y, y_pred))
+        acc = self.loss_function.acc(y, y_pred)
+
+        return loss, acc
     
     def fit(self, X, y, n_epochs, batch_size):
         """ Train on n_epochs """
