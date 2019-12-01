@@ -36,45 +36,45 @@ class Dense(Layer):
         self.n_units = n_units
         self.trainable = True
         self.initializer = initializer
-        
+
         self.W = None
         self.b = None
-        
+
         # For debugging
         self.dW = None
         self.db = None
-        
+
 
     def initialize(self):
         # Initialize the weights
-        
+
         wshape = (self.n_units, self.input_shape[0])
         if self.initializer == 'normal':
             lim = 1 / math.sqrt(wshape[0])
             self.W  = np.random.uniform(-lim, lim, wshape)
-            
+
         if self.initializer == 'ng':
             self.W  = np.random.randn(wshape[0], wshape[1]) / np.sqrt(wshape[1])
-                       
+
         self.b = np.zeros(shape = (self.n_units, 1))
-        
+
         #crosschecks
         assert(self.W.shape == (self.n_units, self.input_shape[0]))
         assert(self.b.shape == (self.n_units, 1))
-    
+
 
     def output_shape(self):
         return (self.n_units,)
-        
-    
+
+
     def forward(self, A_prev, training=True): #what is training=True for?
-        
+
         self.layer_input = A_prev
         self.Z= np.dot((self.W), A_prev) + self.b
-        
+
         assert(self.Z.shape == (self.W.shape[0], A_prev.shape[1]))
         return self.Z
-    
+
     def backward(self, dZ):
         # Save weights used during forwards pass
         W = self.W
@@ -84,7 +84,7 @@ class Dense(Layer):
             # Calculate gradient w.r.t layer weights
             dW = np.dot(dZ, A_prev.T) / dZ.shape[1]
             db = np.sum(dZ, axis=1, keepdims=True) / dZ.shape[1]
-            
+
             self.dW = dW
             self.db = db
 
@@ -94,14 +94,14 @@ class Dense(Layer):
             self.b = self.b - learning_rate * db
 
         dA_prev = np.dot(W.T, dZ)
-        
+
         return dA_prev
 
-        
-        
+
+
 activation_functions = {
     'sigmoid': Sigmoid,
-    'relu': Relu    
+    'relu': Relu
 }
 
 class Activation(Layer):
@@ -116,7 +116,7 @@ class Activation(Layer):
         self.activation_name = name
         self.activation_func = activation_functions[name]()
         self.trainable = True
-    
+
     def output_shape(self):
         return self.input_shape
 
@@ -126,11 +126,11 @@ class Activation(Layer):
 
     def backward(self, dA):
         Z = self.layer_input
-        dact = self.activation_func.gradient(Z)        
+        dact = self.activation_func.gradient(Z)
         assert Z.shape == dact.shape
-        
+
         dZ = np.multiply(dA, dact)
         assert(dZ.shape == (Z.shape))
-        
+
         return dZ 
 

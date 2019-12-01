@@ -17,7 +17,7 @@ class Loss(object):
         raise NotImplementedError()
 
     def acc(self, y, y_pred):
-        return 0
+        return NotImplementedError()
 
 class SquareLoss(Loss):
     def __init__(self): pass
@@ -27,6 +27,10 @@ class SquareLoss(Loss):
 
     def gradient(self, y, y_pred):
         return -(y - y_pred)
+
+    def acc(self, y, y_pred):
+        return 0.5 * np.mean(np.power((y - y_pred), 2))
+
 
 class CrossEntropy(Loss):
     def __init__(self): pass
