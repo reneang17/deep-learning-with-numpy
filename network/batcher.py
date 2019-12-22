@@ -6,7 +6,7 @@ def batcher(X, y=None, batch_size=64):
     for i in np.arange(0, n_samples, batch_size):
         start, end = i, min(i+batch_size, n_samples)
         if y is not None:
-            yield X[:, start:end], y[start:end]
+            yield X[:, start:end], y[:, start:end]
         else:
             yield X[:, start:end]
 
