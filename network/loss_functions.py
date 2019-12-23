@@ -5,7 +5,7 @@ from activation_functions import Sigmoid
 
 
 def accuracy_score(y_true, y_pred):
-    accuracy = np.sum(y_true == y_pred, axis=0) / len(y_true)
+    accuracy = np.sum(y_true == y_pred) /len(y_true)
     return accuracy
 
 
@@ -41,7 +41,7 @@ class CrossEntropy(Loss):
         return - y * np.log(AL) - (1 - y) * np.log(1 - AL)
 
     def acc(self, y, AL):
-        return accuracy_score(np.argmax(y, axis=1), np.argmax(AL, axis=1))
+        return accuracy_score(y[0], AL[0]>=0.5)
 
     def gradient(self, y, AL):
         # Avoid division by zero
