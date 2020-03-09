@@ -88,10 +88,8 @@ deep learning specialization lectures.
 \end{equation}
 
 \begin{equation}
-    \nz{i}{l}\equiv \nt{i}{\nu}{l}\na{\nu }{l} %\label{eq:}
+    \nz{i}{l}\equiv \nt{i}{\nu}{l}\na{\nu }{l-1} %\label{eq:}
 \end{equation}
-
-
 
 It should be understood that in $\na{i}{l}$ 
 one has  $i \in \{1,..., s_l\} $, 
@@ -234,8 +232,6 @@ $n_{X}^{[l]}= (n_{X}^{[l-1]}-f^{[l]})/S^{[l]}+1$. Finally, the indices of the
 weights of the $l$ layer, $\nt{r}{s}{l}$ , runs over $r,s\in \{0,..., f^{[l]}-1\}$.
 
 
-
-
 \section{Back prop}
 
 The following recursion relations do the job
@@ -285,6 +281,100 @@ Hence, in an abbreviated notation one has:
 	&\dd a_{j_{l-1}}^{[l-1]}=(\theta^{[l]T})_{j_{l-1} j_{l}} \dd z_{j_{l}}^{[l]}\\
 	&\dd  \nz{j_{l}}{l}= \dd a_{j_l}^{[l]} \,\, g^{[l]'}\left( z_{j_{l}}^{[l]}   \right)
 \end{eqnarray}
+
+\section{Propagation with softmax }
+
+
+\begin{equation}
+    \na{\mu}{0} \equiv \delta_{\mu0}+\delta_{\mu i} x_i %\label{eq:}
+\end{equation}
+
+\begin{equation}
+    \na{\mu}{l} \equiv \delta_{\mu0} +\delta_{\mu i }^{[l]}\,\,
+    \ff{g^{[l]}}{  \nt{i}{\nu}{l}\na{\nu }{l-1}  } , \,\,\,\, l<L %\label{eq:} , 
+\end{equation}
+
+\begin{equation}
+    \nz{i}{l}\equiv \nt{i}{\nu}{l}\na{\nu }{l-1} ,\,\,\,\, l\le L %\label{eq:} 
+\end{equation}
+
+\begin{align}
+ \hat{y}_i \equiv   \frac{e^{\nz{i}{L}} } {\sum_c e^{\nz{c}{L} }}
+\end{align}
+
+It should be understood that in $\na{i}{l}$ 
+one has  $i \in \{1,..., s_l\} $, 
+and that in $\na{\mu}{l}$ one has $ \mu \in \{0,..., s_l\}$. The loss function is
+
+\begin{equation}
+    J\equiv -\sum_i y_i \ff{\log}{\hat{y}_i }  
+\end{equation}
+
+\section{Back propagation}
+
+The following recursion relations do the job
+\begin{equation}
+    \underbrace{
+    \frac{\partial J }{\partial  \nt{j_l}{j_{l-1}}{l}  }
+    }_{\dd  \nt{j_l}{j_{l-1}}{l} } 
+   =
+   \underbrace{
+    \frac{\partial J  }{\partial \nz{j_l}{l} }
+    }_{\dd  \nz{j_{l}}{l} }
+    \underbrace{
+    \frac{\partial \nz{j_l}{l} }{\partial \nt{j_l}{j_{l-1}}{l}  }
+    }_{ \na{j_{l-1}}{l-1} }
+    %\label{eq:}
+\end{equation}
+
+
+
+\begin{equation}
+\underbrace{
+\frac{\partial J  }{\partial \nz{j_l}{l}   }
+}_{\dd  \nz{j_{l}}{l} }
+	=
+	\underbrace{ 
+	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   } 
+	\frac{\partial \nz{j_{l+1}}{l+1}   }{ \partial \na{j_{l}}{l}  }
+	}_{\dd a_{j_l}^{[l]} }
+	\frac{\partial \na{j_{l}}{l}    }{ \partial \nz{j_{l}}{l}  }
+	=
+	\underbrace{
+	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   } 
+	 \nt{j_{l+1}}{j_l}{l+1}
+	 }_{ \dd a_{j_l}^{[l]}=(\theta^{[l+1]T})_{j_l j_{l+1}} \dd z_{j_{l+1}}^{[l+1]} }
+	 g^{[l]'}\left( z_{j_{l}}^{[l]}   \right)
+\end{equation}
+
+Hence, in an abbreviated notation one has:
+\begin{eqnarray}
+	&\dd  \nt{j_l}{j_{l-1}}{l} = \dd  \nz{j_{l}}{l}  \na{j_{l-1}}{l-1}\\
+	&\dd a_{j_{l-1}}^{[l-1]}=(\theta^{[l]T})_{j_{l-1} j_{l}} \dd z_{j_{l}}^{[l]}\\
+	&\dd  \nz{j_{l}}{l}= \dd a_{j_l}^{[l]} \,\, g^{[l]'}\left( z_{j_{l}}^{[l]}   \right)
+\end{eqnarray}
+
+Hence, by providing $\{ \dd a^{[l]}  , \theta^{[l]}\}$ one gets $\{ \dd  \nt{j_l}{\mu}{l}, \dd a_{j_{l-1}}^{[l-1]}\}$ and this process can be iterated. 
+The initial condition is
+\begin{eqnarray}
+    &\dd \theta^{[L]}_{j_L j_{L-1}}= \frac{\partial J }{\partial  \nt{j_L}{\mu}{L}  } =
+   \left( -  \frac{y_i }{ \hat{y}_i} \right)
+   \left(  \frac{ \partial \hat{y}_i}{\partial z_k^{[L]} }    \right)
+   \left(   \frac{ \partial z_k^{[L]} } {\partial  \nt{j_L}{j_{L-1}}{L}  }  \right) 
+\end{eqnarray}
+
+\begin{align}
+ \frac{ \partial \hat{y}_i}{\partial z_k^{[L]} } =\hat{y}_i(  \delta_{ik} -   \hat{y}_k) 
+\end{align}
+\begin{align}
+\frac{ \partial z_j^{[L]} } {\partial  \nt{j_L}{j_{L-1}}{L}  }  =  a^{L-1}_{j_{L-1}}
+\end{align}
+
+*******************************************************
+
+\section{Old, don't look!}
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
