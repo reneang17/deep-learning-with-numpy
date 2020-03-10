@@ -3,7 +3,7 @@ import math
 import numpy as np
 import copy
 
-from activation_functions import Sigmoid, Relu
+from activation_functions import Sigmoid, Relu, Softmax
 
 
 
@@ -82,15 +82,16 @@ class Dense(Layer):
 
         if self.trainable:
             # Calculate gradient w.r.t layer weights
-            dW = np.dot(dZ, A_prev.T) / dZ.shape[1]
-            db = np.sum(dZ, axis=1, keepdims=True) / dZ.shape[1]
+            dW = np.dot(dZ, A_prev.T)
+            db = np.sum(dZ, axis=1, keepdims=True)
 
             self.dW = dW
+
             self.db = db
 
             # Update the layer weights
-            learning_rate = 0.0075
-            self.W = self.W - learning_rate * dW 
+            learning_rate = 0.01
+            self.W = self.W - learning_rate * dW
             self.b = self.b - learning_rate * db
 
         dA_prev = np.dot(W.T, dZ)
@@ -132,5 +133,35 @@ class Activation(Layer):
         dZ = np.multiply(dA, dact)
         assert(dZ.shape == (Z.shape))
 
-        return dZ 
+        return dZ
 
+
+class Activation_SoftMax(Layer):
+    """A layer that applies an activation operation to the input.
+    Parameters:
+    -----------
+    name: string
+        The name of the activation function that will be used.
+    """
+
+    def __init__(self):
+        self.activation_name = 'softmax'
+        self.activation_func = Softmax()
+        self.trainable = True
+
+    def output_shape(self):
+        return self.input_shape
+
+    def forward(self, Z, training=True):
+        self.layer_input = Z
+        return self.activation_func(Z)
+
+    def backward(self, dA):
+        Z = self.layer_input
+        dact = self.activation_func.gradient(Z)
+        #assert Z.shape == dact.shape
+
+        dZ = np.sum(np.multiply(dA, dact), axis = 1)
+        assert(dZ.shape == (Z.shape))
+
+        return dZ
