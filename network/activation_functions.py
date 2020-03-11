@@ -23,6 +23,9 @@ class Relu():
     def gradient(self, Z):
         return np.where(Z >= 0, 1, 0)
 
+
+
+
 class Softmax():
     """
     Fordward/backward Softmax propagation
@@ -38,5 +41,5 @@ class Softmax():
         grad = - p[:, np.newaxis, :] *  p[np.newaxis, :, :]
         diag = np.arange(p.shape[0])
         grad[diag, diag, :]  = p * (1-p)
-        
+
         return grad

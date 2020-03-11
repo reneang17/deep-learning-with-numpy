@@ -74,7 +74,7 @@ class SoftmaxCrossEntropy(Loss):
     def loss(self, y, Z):
         # Avoid division by zero
         Z_aux = Z.shape
-        Z -= np.max(Z, axis = 0, keepdims=True)
+        Z = Z - np.max(Z, axis = 0, keepdims=True)
         assert Z_aux ==Z.shape
 
         log_e_Z = Z- np.log(np.sum( np.exp(Z), axis=0, keepdims=True))

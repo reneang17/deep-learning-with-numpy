@@ -50,7 +50,7 @@ class Dense(Layer):
 
         wshape = (self.n_units, self.input_shape[0])
         if self.initializer == 'normal':
-            lim = 1 / math.sqrt(wshape[0])
+            lim = np.sqrt(6) / math.sqrt(wshape[0]+wshape[1])
             self.W  = np.random.uniform(-lim, lim, wshape)
 
         if self.initializer == 'ng':
@@ -71,7 +71,7 @@ class Dense(Layer):
 
         self.layer_input = A_prev
         self.Z= np.dot((self.W), A_prev) + self.b
-
+        #print(self.W.shape, self.b.shape)
         assert(self.Z.shape == (self.W.shape[0], A_prev.shape[1]))
         return self.Z
 
@@ -90,9 +90,14 @@ class Dense(Layer):
             self.db = db
 
             # Update the layer weights
-            learning_rate = 0.01
+            learning_rate = 0.05
             self.W = self.W - learning_rate * dW
             self.b = self.b - learning_rate * db
+
+            #print('****************************')
+            #print('dw:', self.dW)
+            #print('db:', self.db)
+
 
         dA_prev = np.dot(W.T, dZ)
 
