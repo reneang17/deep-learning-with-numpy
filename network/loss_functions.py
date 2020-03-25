@@ -62,7 +62,7 @@ class MultiClassCrossEntropy(Loss):
     #    return accuracy_score(y[0], AL[0]>=0.5)
     def gradient(self, y, AL):
         # Avoid division by zero
-        #AL = np.clip(AL, 1e-15, 1 - 1e-15)
+        AL = np.clip(AL, 1e-15, 1 - 1e-15)
 
         assert(AL.shape == (-(y / AL)).shape)
         #print  ((- (y / AL) + (1 - y) / (1 - AL) ).shape,'cross-function output dA')
