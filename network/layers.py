@@ -30,13 +30,14 @@ class Dense(Layer):
         the number of features of the input. Must be specified if it is the first layer in
         the network.
     """
-    def __init__(self, n_units, input_shape=None, initializer = 'normal'):
+    def __init__(self, n_units, input_shape=None, initializer = 'normal', lr = 0.05):
         self.layer_input = None
         self.input_shape = input_shape
         self.n_units = n_units
         self.trainable = True
         self.initializer = initializer
-
+        
+        self.lr = lr
         self.W = None
         self.b = None
 
@@ -90,9 +91,9 @@ class Dense(Layer):
             self.db = db
 
             # Update the layer weights
-            learning_rate = 0.05
-            self.W = self.W - learning_rate * dW
-            self.b = self.b - learning_rate * db
+  
+            self.W = self.W - self.lr * dW
+            self.b = self.b - self.lr * db
 
             #print('****************************')
             #print('dw:', self.dW)
