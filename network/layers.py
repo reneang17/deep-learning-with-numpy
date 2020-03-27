@@ -23,20 +23,20 @@ class Dense(Layer):
     """A fully-connected NN layer.
     Parameters:
     -----------
-    n_units: int
+    out_units: int
         The number of neurons in the layer.
     input_shape: tuple
         The expected input shape of the layer. For dense layers a single digit specifying
         the number of features of the input. Must be specified if it is the first layer in
         the network.
     """
-    def __init__(self, n_units, input_shape=None, initializer = 'normal', lr = 0.05):
+    def __init__(self, out_units, input_shape=None, initializer = 'normal', lr = 0.06):
         self.layer_input = None
         self.input_shape = input_shape
-        self.n_units = n_units
+        self.out_units = out_units
         self.trainable = True
         self.initializer = initializer
-        
+
         self.lr = lr
         self.W = None
         self.b = None
@@ -49,7 +49,7 @@ class Dense(Layer):
     def initialize(self):
         # Initialize the weights
 
-        wshape = (self.n_units, self.input_shape[0])
+        wshape = (self.out_units, self.input_shape[0])
         if self.initializer == 'normal':
             lim = np.sqrt(6) / math.sqrt(wshape[0]+wshape[1])
             self.W  = np.random.uniform(-lim, lim, wshape)
@@ -57,15 +57,15 @@ class Dense(Layer):
         if self.initializer == 'ng':
             self.W  = np.random.randn(wshape[0], wshape[1]) / np.sqrt(wshape[1])
 
-        self.b = np.zeros(shape = (self.n_units, 1))
+        self.b = np.zeros(shape = (self.out_units, 1))
 
         #crosschecks
-        assert(self.W.shape == (self.n_units, self.input_shape[0]))
-        assert(self.b.shape == (self.n_units, 1))
+        assert(self.W.shape == (self.out_units, self.input_shape[0]))
+        assert(self.b.shape == (self.out_units, 1))
 
 
-    def output_shape(self):
-        return (self.n_units,)
+    def get_output_shape(self):
+        return (self.out_units,)
 
 
     def forward(self, A_prev, training=True): #what is training=True for?
@@ -80,24 +80,22 @@ class Dense(Layer):
         # Save weights used during forwards pass
         W = self.W
         A_prev = self.layer_input
+        norm= A_prev.shape[-1]
 
         if self.trainable:
             # Calculate gradient w.r.t layer weights
-            dW = np.dot(dZ, A_prev.T)
-            db = np.sum(dZ, axis=1, keepdims=True)
+            dW = np.dot(dZ, A_prev.T)/norm #(2)normalize
+            db = np.sum(dZ, axis=1, keepdims=True)/norm #(2)normalize
 
             self.dW = dW
 
             self.db = db
 
             # Update the layer weights
-  
+
             self.W = self.W - self.lr * dW
             self.b = self.b - self.lr * db
 
-            #print('****************************')
-            #print('dw:', self.dW)
-            #print('db:', self.db)
 
 
         dA_prev = np.dot(W.T, dZ)
@@ -124,7 +122,7 @@ class Activation(Layer):
         self.activation_func = activation_functions[name]()
         self.trainable = True
 
-    def output_shape(self):
+    def get_output_shape(self):
         return self.input_shape
 
     def forward(self, Z, training=True):
@@ -155,7 +153,7 @@ class Activation_SoftMax(Layer):
         self.activation_func = Softmax()
         self.trainable = True
 
-    def output_shape(self):
+    def get_output_shape(self):
         return self.input_shape
 
     def forward(self, Z, training=True):

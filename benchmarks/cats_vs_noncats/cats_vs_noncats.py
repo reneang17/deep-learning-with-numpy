@@ -128,7 +128,7 @@ def print_mislabeled_images(classes, X, y, p):
 
 
 ## START CODE HERE ##
-my_image = "my_image5.jpg" # change this to the name of your image file
+my_image = "my_image4.jpg" # change this to the name of your image file
 my_label_y = 1 # the true class of your image (1 -> cat, 0 -> non-cat)
 ## END CODE HERE ##
 
