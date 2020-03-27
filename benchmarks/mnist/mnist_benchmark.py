@@ -53,18 +53,17 @@ from main_class import *
 from layers import *
 from loss_functions import *
 
+print('MultiClassCrossEntropy')
 md=NeuralNetwork(MultiClassCrossEntropy)
 np.random.seed(1)
 
 n_x = 784    # num_px * num_px * 3
-
-md.add(Dense(100, input_shape=(n_x,), initializer = 'normal'))
+lr = 0.05    # num_px * num_px * 3
+md.add(Dense(100, input_shape=(n_x,), initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
-
-md.add(Dense(200, initializer = 'normal'))
+md.add(Dense(200, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
-
-md.add(Dense(10, initializer = 'normal'))
+md.add(Dense(10, initializer = 'normal', lr = lr))
 md.add(Activation_SoftMax())
 
 #train
@@ -83,3 +82,34 @@ def accuracy(test_x, test_y):
 ## Evalaution
 print('Training accuarecy: {}'.format(accuracy(train_x , train_y)))
 print('Test accuarecy: {}'.format(accuracy(test_x , test_y)))
+print('Training loss: {}'.format(hist[0][-1]))
+
+
+print('Using')
+md=NeuralNetwork(SoftmaxCrossEntropy)
+np.random.seed(1)
+lr = 0.05
+n_x = 784    # num_px * num_px * 3
+md.add(Dense(100, input_shape=(n_x,), initializer = 'normal', lr = lr))
+md.add(Activation('relu'))
+md.add(Dense(200, initializer = 'normal', lr = lr))
+md.add(Activation('relu'))
+md.add(Dense(10, initializer = 'normal', lr = lr))
+
+#train
+hist = md.fit(train_x, train_y, n_epochs=25, batch_size=32)
+
+def softmax(x):
+        e_x = np.exp(x )
+        return e_x / np.sum(e_x, axis=0, keepdims=True)
+
+def accuracy(test_x, test_y):
+    preds = softmax(md.predict(test_x))
+    preds = np.array([y for y in np.argmax(preds, axis=0)]).squeeze()
+    test_y_ = np.array([y for y in np.argmax(test_y, axis=0)]).squeeze()
+    return np.mean(preds == test_y_)
+
+## Evalaution
+print('Training accuarecy: {}'.format(accuracy(train_x , train_y)))
+print('Test accuarecy: {}'.format(accuracy(test_x , test_y)))
+print('Training loss: {}'.format(hist[0][-1]))

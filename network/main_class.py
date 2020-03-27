@@ -38,7 +38,7 @@ class NeuralNetwork():
         # If not first layer added then set the input shape
         # to the output shape of the last added layer
         if self.layers:
-            layer.set_input_shape(shape=self.layers[-1].output_shape())
+            layer.set_input_shape(shape=self.layers[-1].get_output_shape())
 
         # If the layer has weights that needs to be initialized
         if hasattr(layer, 'initialize'):
@@ -52,7 +52,7 @@ class NeuralNetwork():
     def train_on_batch(self, X, y):
         """ Forward/backward on batch """
         y_pred = self._forward(X)
-        loss = np.sum(self.loss_function.loss(y, y_pred))
+        loss = np.mean(self.loss_function.loss(y, y_pred))#(1)mean normalizes
         acc = self.loss_function.acc(y, y_pred)
         # Calculate the gradient of the loss function wrt y_pred
         loss_grad = self.loss_function.gradient(y, y_pred)
