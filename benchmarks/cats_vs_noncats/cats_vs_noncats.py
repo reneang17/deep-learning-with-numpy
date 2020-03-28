@@ -26,12 +26,12 @@ sys.path.append('../../network')
 # Load data
 train_x_orig, train_y, test_x_orig, test_y, classes = load_data()
 
-print('Example pic:')
+#print('Example pic:')
 # Example of a picture
-index = 11
-plt.imshow(train_x_orig[index])
-plt.show()
-print ("y = " + str(train_y[0,index]) + ". It's a " + classes[train_y[0,index]].decode("utf-8") +  " picture.")
+#index = 11
+#plt.imshow(train_x_orig[index])
+#plt.show()
+#print ("y = " + str(train_y[0,index]) + ". It's a " + classes[train_y[0,index]].decode("utf-8") +  " picture.")
 
 
 # Explore your dataset
@@ -90,7 +90,7 @@ md.add(Activation('relu'))
 md.add(Dense(n_y, initializer = 'ng', lr = lr))
 md.add(Activation('sigmoid'))
 
-train, val = md.fit(train_x, train_y, n_epochs=2400, batch_size=32)
+train, val = md.fit(train_x, train_y, n_epochs=1800, batch_size=32)
 
 pred =md.predict(train_x)
 pred=(pred >=0.5)
@@ -129,14 +129,28 @@ def print_mislabeled_images(classes, X, y, p):
 
 ## START CODE HERE ##
 my_image = "my_image4.jpg" # change this to the name of your image file
-my_label_y = 1 # the true class of your image (1 -> cat, 0 -> non-cat)
+my_label_y = 0 # the true class of your image (1 -> cat, 0 -> non-cat)
 ## END CODE HERE ##
 
 fname = "images/" + my_image
 image = np.array(ndimage.imread(fname, flatten=False))
 my_image = scipy.misc.imresize(image, size=(num_px,num_px)).reshape((num_px*num_px*3,1))
 my_image = my_image/255.
-my_predicted_image = md.predict(my_image)
+my_predicted_image = md.predict(my_image)>=0.5
+
+plt.imshow(image)
+plt.show()
+print ("y = " + str(np.squeeze(my_predicted_image)) + ", your predicts a \"" + classes[int(np.squeeze(my_predicted_image)),].decode("utf-8") +  "\" picture.")
+
+my_image = "my_image3.jpg" # change this to the name of your image file
+my_label_y = 0 # the true class of your image (1 -> cat, 0 -> non-cat)
+## END CODE HERE ##
+
+fname = "images/" + my_image
+image = np.array(ndimage.imread(fname, flatten=False))
+my_image = scipy.misc.imresize(image, size=(num_px,num_px)).reshape((num_px*num_px*3,1))
+my_image = my_image/255.
+my_predicted_image = md.predict(my_image)>=0.5
 
 plt.imshow(image)
 plt.show()

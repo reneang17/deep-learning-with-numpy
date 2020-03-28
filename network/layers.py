@@ -20,15 +20,9 @@ class Layer(object):
 
 
 class Dense(Layer):
-    """A fully-connected NN layer.
-    Parameters:
-    -----------
-    out_units: int
-        The number of neurons in the layer.
-    input_shape: tuple
-        The expected input shape of the layer. For dense layers a single digit specifying
-        the number of features of the input. Must be specified if it is the first layer in
-        the network.
+    """A fully-connected NN layer without activation func
+    out_units: int, Number of neurons in the layer.
+    input_shape: tuple, The expected input shape of the layer.
     """
     def __init__(self, out_units, input_shape=None, initializer = 'normal', lr = 0.06):
         self.layer_input = None
@@ -45,10 +39,12 @@ class Dense(Layer):
         self.dW = None
         self.db = None
 
+    def get_output_shape(self):
+        return (self.out_units,)
 
     def initialize(self):
-        # Initialize the weights
-
+        """ Initialize the weights
+        """
         wshape = (self.out_units, self.input_shape[0])
         if self.initializer == 'normal':
             lim = np.sqrt(6) / math.sqrt(wshape[0]+wshape[1])
@@ -58,15 +54,9 @@ class Dense(Layer):
             self.W  = np.random.randn(wshape[0], wshape[1]) / np.sqrt(wshape[1])
 
         self.b = np.zeros(shape = (self.out_units, 1))
-
         #crosschecks
-        assert(self.W.shape == (self.out_units, self.input_shape[0]))
-        assert(self.b.shape == (self.out_units, 1))
-
-
-    def get_output_shape(self):
-        return (self.out_units,)
-
+        #assert(self.W.shape == (self.out_units, self.input_shape[0]))
+        #assert(self.b.shape == (self.out_units, 1))
 
     def forward(self, A_prev, training=True): #what is training=True for?
 
@@ -86,21 +76,13 @@ class Dense(Layer):
             # Calculate gradient w.r.t layer weights
             dW = np.dot(dZ, A_prev.T)/norm #(2)normalize
             db = np.sum(dZ, axis=1, keepdims=True)/norm #(2)normalize
-
-            self.dW = dW
-
-            self.db = db
-
+            #self.dW = dW # No need to safe
+            #self.db = db
             # Update the layer weights
-
             self.W = self.W - self.lr * dW
             self.b = self.b - self.lr * db
 
-
-
-        dA_prev = np.dot(W.T, dZ)
-
-        return dA_prev
+        return np.dot(W.T, dZ) # return dA_prev
 
 
 
