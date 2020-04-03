@@ -66,6 +66,8 @@ md.add(Activation('relu'))
 md.add(Dense(10, initializer = 'normal', lr = lr))
 md.add(Activation_SoftMax())
 
+md.print_network()
+
 #train
 hist = md.fit(train_x, train_y, n_epochs=25, batch_size=32)
 
@@ -95,6 +97,9 @@ md.add(Activation('relu'))
 md.add(Dense(200, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 md.add(Dense(10, initializer = 'normal', lr = lr))
+
+md.print_network()
+
 
 #train
 hist = md.fit(train_x, train_y, n_epochs=25, batch_size=32)

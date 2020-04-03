@@ -25,11 +25,14 @@ class Dense(Layer):
     input_shape: tuple, The expected input shape of the layer.
     """
     def __init__(self, out_units, input_shape=None, initializer = 'normal', lr = 0.06):
+        self.layer_name ='dense'
+        self.layer_shape = None
         self.layer_input = None
         self.input_shape = input_shape
         self.out_units = out_units
         self.trainable = True
         self.initializer = initializer
+        self.lshape = None
 
         self.lr = lr
         self.W = None
@@ -45,13 +48,13 @@ class Dense(Layer):
     def initialize(self):
         """ Initialize the weights
         """
-        wshape = (self.out_units, self.input_shape[0])
+        self.layer_shape = (self.out_units, self.input_shape[0])
         if self.initializer == 'normal':
-            lim = np.sqrt(6) / math.sqrt(wshape[0]+wshape[1])
-            self.W  = np.random.uniform(-lim, lim, wshape)
+            lim = np.sqrt(6) / math.sqrt(self.layer_shape[0]+self.layer_shape[1])
+            self.W  = np.random.uniform(-lim, lim, self.layer_shape)
 
         if self.initializer == 'ng':
-            self.W  = np.random.randn(wshape[0], wshape[1]) / np.sqrt(wshape[1])
+            self.W  = np.random.randn(self.layer_shape[0], self.layer_shape[1]) / np.sqrt(self.layer_shape[1])
 
         self.b = np.zeros(shape = (self.out_units, 1))
         #crosschecks
@@ -100,9 +103,16 @@ class Activation(Layer):
     """
 
     def __init__(self, name):
-        self.activation_name = name
-        self.activation_func = activation_functions[name]()
+        self.layer_name = name
+        self.layer_shape = None
+        self.input_shape = None
+        self.activation_func = activation_functions[self.layer_name]()
         self.trainable = True
+
+    def initialize(self):
+        """ Set shape
+        """
+        self.layer_shape = (self.input_shape[0], self.input_shape[0])
 
     def get_output_shape(self):
         return self.input_shape
@@ -131,9 +141,16 @@ class Activation_SoftMax(Layer):
     """
 
     def __init__(self):
-        self.activation_name = 'softmax'
+        self.layer_name = 'softmax'
+        self.input_shape = None
+        self.layer_shape = None
         self.activation_func = Softmax()
         self.trainable = True
+
+    def initialize(self):
+        """ Set shape
+        """
+        self.layer_shape = (self.input_shape[0], self.input_shape[0])
 
     def get_output_shape(self):
         return self.input_shape

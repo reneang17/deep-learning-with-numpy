@@ -20,7 +20,8 @@ class Loss(object):
         return NotImplementedError()
 
 class SquareLoss(Loss):
-    def __init__(self): pass
+    def __init__(self):
+        self.loss_name = 'SquareLoss'
 
     def loss(self, y, y_pred):
         return 0.5 * np.power((y - y_pred), 2)
@@ -33,7 +34,8 @@ class SquareLoss(Loss):
 
 
 class CrossEntropy(Loss):
-    def __init__(self): pass
+    def __init__(self):
+        self.loss_name = 'CrossEntropy'
 
     def loss(self, y, AL):
         # Avoid division by zero
@@ -52,7 +54,8 @@ class CrossEntropy(Loss):
 
 
 class MultiClassCrossEntropy(Loss):
-    def __init__(self): pass
+    def __init__(self):
+        self.loss_name = 'MultiClassCrossEntropy'
 
     def loss(self, y, AL):
         return -np.sum(y * np.log(AL) ,axis= 0, keepdims = True) #/(y.shape[-1])#(1)normalize in main
@@ -66,7 +69,8 @@ class MultiClassCrossEntropy(Loss):
         return - (y / AL) # /(y.shape[-1])#(2)normalize when updating grad
 
 class SoftmaxCrossEntropy(Loss):
-    def __init__(self): pass
+    def __init__(self):
+        self.loss_name = 'SoftmaxCrossEntropy'
 
     def loss(self, y, Z):
         # Avoid division by zero

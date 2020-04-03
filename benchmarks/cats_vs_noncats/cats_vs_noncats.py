@@ -90,11 +90,15 @@ md.add(Activation('relu'))
 md.add(Dense(n_y, initializer = 'ng', lr = lr))
 md.add(Activation('sigmoid'))
 
+#Print_network shape
+md.print_network()
+
+# Train
 train, val = md.fit(train_x, train_y, n_epochs=1800, batch_size=32)
 
+#Evaluate
 pred =md.predict(train_x)
 pred=(pred >=0.5)
-
 acc = np.mean((pred == train_y))
 print('Training acc: {}'.format(acc))
 
