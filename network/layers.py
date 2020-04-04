@@ -178,23 +178,24 @@ class Flatten(Layer):
     def __init__(self, input_shape = None):
         self.layer_name = 'flatten'
         self.input_shape = input_shape
-        print(self.input_shape)
         self.trainable = False
 
     def initialize(self):
         # Just to set the output shape, but not needed below
-        self.output_shape = (self.input_shape[0]*self.input_shape[1],)
+        coords_to_flatten = 1
+        for i in self.input_shape:
+            coords_to_flatten *=i
+        self.output_shape = (coords_to_flatten,)
 
     def get_output_shape(self):
         return self.output_shape
 
     def forward(self, Z, training=True):
-        self.layer_input = Z
         batch_size= Z.shape[-1]
         shape = (self.output_shape[0], batch_size)
-        return self.layer_input.reshape(shape)
+        return Z.reshape(shape)
 
     def backward(self, dA):
         batch_size= dA.shape[-1]
-        shape = (self.input_shape[0], self.input_shape[1], batch_size)
+        shape = self.input_shape+(batch_size,)
         return dA.reshape(shape)
