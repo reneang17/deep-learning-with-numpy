@@ -36,6 +36,7 @@ class NeuralNetwork():
         """ Method which adds a layer to the neural network """
         # If not first layer added then set the input shape
         # to the output shape of the last added layer
+
         if self.layers:
             layer.set_input_shape(shape=self.layers[-1].get_output_shape())
 

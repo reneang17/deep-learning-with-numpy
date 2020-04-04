@@ -175,14 +175,15 @@ class Flatten(Layer):
         The name of the activation function that will be used.
     """
 
-    def __init__(input_shape = None):
+    def __init__(self, input_shape = None):
         self.layer_name = 'flatten'
         self.input_shape = input_shape
+        print(self.input_shape)
         self.trainable = False
 
     def initialize(self):
         # Just to set the output shape, but not needed below
-        self.output_shape = self.input_shape[0]*self.input_shape[1]
+        self.output_shape = (self.input_shape[0]*self.input_shape[1],)
 
     def get_output_shape(self):
         return self.output_shape

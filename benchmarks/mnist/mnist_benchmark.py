@@ -57,7 +57,8 @@ np.random.seed(1)
 
 n_x = 784    # num_px * num_px * 3
 lr = 0.05    # num_px * num_px * 3
-md.add(Dense(100, input_shape=(n_x,), initializer = 'normal', lr = lr))
+md.add(Flatten(input_shape = (28, 28, )))
+md.add(Dense(100, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 md.add(Dense(200, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
@@ -90,7 +91,8 @@ md=NeuralNetwork(SoftmaxCrossEntropy)
 np.random.seed(1)
 lr = 0.05
 n_x = 784    # num_px * num_px * 3
-md.add(Dense(100, input_shape=(n_x,), initializer = 'normal', lr = lr))
+md.add(Flatten(input_shape = (28, 28,)))
+md.add(Dense(100, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 md.add(Dense(200, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
