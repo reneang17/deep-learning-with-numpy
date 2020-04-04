@@ -15,7 +15,7 @@ def vectorized_result(y):
 
 from tensorflow import keras
 
-def load_dataset(flatten=False):
+def load_dataset(flatten=False, unsqueeze = False):
     (X_train, y_train), (X_test, y_test) = keras.datasets.mnist.load_data()
 
     # normalize x
@@ -42,9 +42,14 @@ def load_dataset(flatten=False):
         X_val = X_val.reshape((28*28, X_val.shape[-1]))
         X_test = X_test.reshape((28*28, X_test.shape[-1]))
 
+    if unsqueeze:
+        X_train = X_train.reshape((28, 28, 1, X_train.shape[-1]))
+        X_val = X_val.reshape((28,28, 1, X_val.shape[-1]))
+        X_test = X_test.reshape((28,28, 1, X_test.shape[-1]))
+
     return X_train, y_train, X_val, y_val, X_test, y_test
 
-train_x, train_y, val_x, val_y, test_x, test_y = load_dataset(True)
+train_x, train_y, val_x, val_y, test_x, test_y = load_dataset(False, False)
 
 # Building network
 from main_class import *
@@ -57,7 +62,7 @@ np.random.seed(1)
 
 n_x = 784    # num_px * num_px * 3
 lr = 0.05    # num_px * num_px * 3
-md.add(Flatten(input_shape = (28, 28, )))
+md.add(Flatten(input_shape = (28, 28, 1,)))
 md.add(Dense(100, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 md.add(Dense(200, initializer = 'normal', lr = lr))
@@ -91,7 +96,7 @@ md=NeuralNetwork(SoftmaxCrossEntropy)
 np.random.seed(1)
 lr = 0.05
 n_x = 784    # num_px * num_px * 3
-md.add(Flatten(input_shape = (28, 28,)))
+md.add(Flatten(input_shape = (28, 28, 1,)))
 md.add(Dense(100, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 md.add(Dense(200, initializer = 'normal', lr = lr))
