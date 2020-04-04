@@ -20,10 +20,9 @@ class NeuralNetwork():
     validation: tuple
         A tuple containing validation data and labels (X, y)
     """
-    def __init__(self, loss,validation_data=None):
+    def __init__(self, Loss_function, validation_data=None):
         self.layers = []
-        self.loss_function = loss()
-
+        self.loss_function = Loss_function()
         self.errors = {"training": [], "validation": []}
 
         self.val_set = None
@@ -37,6 +36,7 @@ class NeuralNetwork():
         """ Method which adds a layer to the neural network """
         # If not first layer added then set the input shape
         # to the output shape of the last added layer
+
         if self.layers:
             layer.set_input_shape(shape=self.layers[-1].get_output_shape())
 
@@ -46,8 +46,6 @@ class NeuralNetwork():
 
         # Add layer to the network
         self.layers.append(layer)
-
-
 
     def train_on_batch(self, X, y):
         """ Forward/backward on batch """
@@ -113,3 +111,11 @@ class NeuralNetwork():
         for layer in reversed(self.layers):
             loss_grad = layer.backward(loss_grad)
             #print(loss_grad.shape)
+
+    def print_network(self):
+        print("***** Current network *****")
+        print('layer', '\t\t', 'output_shape', '\t\t', 'Input_shape')
+        for layer in self.layers:
+            print(layer.layer_name, '\t\t', layer.output_shape, '\t\t',layer.input_shape)
+        print('Loss funciton ', '\t\t', self.loss_function.loss_name)
+        print("***************************")
