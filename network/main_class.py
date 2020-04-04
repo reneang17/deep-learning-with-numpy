@@ -113,8 +113,8 @@ class NeuralNetwork():
 
     def print_network(self):
         print("***** Current network *****")
-        print('layer', '\t\t\t', '(out_dim, in_dim)')
+        print('layer', '\t\t', 'output_shape', '\t\t', 'Input_shape')
         for layer in self.layers:
-            print(layer.layer_name, '\t\t\t', layer.layer_shape)
-        print('Loss funciton ', '\t\t\t', self.loss_function.loss_name)
+            print(layer.layer_name, '\t\t', layer.output_shape, '\t\t',layer.input_shape)
+        print('Loss funciton ', '\t\t', self.loss_function.loss_name)
         print("***************************")

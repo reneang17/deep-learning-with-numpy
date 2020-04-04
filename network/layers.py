@@ -26,10 +26,10 @@ class Dense(Layer):
     """
     def __init__(self, out_units, input_shape=None, initializer = 'normal', lr = 0.06):
         self.layer_name ='dense'
-        self.layer_shape = None
         self.layer_input = None
         self.input_shape = input_shape
         self.out_units = out_units
+        self.output_shape = (self.out_units,)
         self.trainable = True
         self.initializer = initializer
         self.lshape = None
@@ -43,20 +43,20 @@ class Dense(Layer):
         self.db = None
 
     def get_output_shape(self):
-        return (self.out_units,)
+        return self.output_shape
 
     def initialize(self):
         """ Initialize the weights
         """
-        self.layer_shape = (self.out_units, self.input_shape[0])
+        wshape = (self.output_shape[0], self.input_shape[0])
         if self.initializer == 'normal':
-            lim = np.sqrt(6) / math.sqrt(self.layer_shape[0]+self.layer_shape[1])
-            self.W  = np.random.uniform(-lim, lim, self.layer_shape)
+            lim = np.sqrt(6) / math.sqrt(wshape[0]+wshape[1])
+            self.W  = np.random.uniform(-lim, lim, wshape)
 
         if self.initializer == 'ng':
-            self.W  = np.random.randn(self.layer_shape[0], self.layer_shape[1]) / np.sqrt(self.layer_shape[1])
+            self.W  = np.random.randn(wshape[0], wshape[1]) / np.sqrt(wshape[1])
 
-        self.b = np.zeros(shape = (self.out_units, 1))
+        self.b = np.zeros(shape = (wshape[0], 1))
         #crosschecks
         #assert(self.W.shape == (self.out_units, self.input_shape[0]))
         #assert(self.b.shape == (self.out_units, 1))
@@ -104,7 +104,6 @@ class Activation(Layer):
 
     def __init__(self, name):
         self.layer_name = name
-        self.layer_shape = None
         self.input_shape = None
         self.activation_func = activation_functions[self.layer_name]()
         self.trainable = True
@@ -112,10 +111,10 @@ class Activation(Layer):
     def initialize(self):
         """ Set shape
         """
-        self.layer_shape = (self.input_shape[0], self.input_shape[0])
+        self.output_shape = self.input_shape
 
     def get_output_shape(self):
-        return self.input_shape
+        return self.output_shape
 
     def forward(self, Z, training=True):
         self.layer_input = Z
@@ -140,20 +139,18 @@ class Activation_SoftMax(Layer):
         The name of the activation function that will be used.
     """
 
-    def __init__(self):
+    def __init__(self, input_shape = None):
         self.layer_name = 'softmax'
-        self.input_shape = None
-        self.layer_shape = None
+        self.input_shape = input_shape
         self.activation_func = Softmax()
-        self.trainable = True
+        self.trainable = False
 
     def initialize(self):
-        """ Set shape
-        """
-        self.layer_shape = (self.input_shape[0], self.input_shape[0])
+        # Just to set the output shape, but not needed below
+        self.output_shape = self.input_shape
 
     def get_output_shape(self):
-        return self.input_shape
+        return self.output_shape
 
     def forward(self, Z, training=True):
         self.layer_input = Z
@@ -168,3 +165,35 @@ class Activation_SoftMax(Layer):
         assert(dZ.shape == (Z.shape))
 
         return dZ
+
+
+class Flatten(Layer):
+    """A layer that flattens a 2D matrix
+    Parameters:
+    -----------
+    name: string
+        The name of the activation function that will be used.
+    """
+
+    def __init__(input_shape = None):
+        self.layer_name = 'flatten'
+        self.input_shape = input_shape
+        self.trainable = False
+
+    def initialize(self):
+        # Just to set the output shape, but not needed below
+        self.output_shape = self.input_shape[0]*self.input_shape[1]
+
+    def get_output_shape(self):
+        return self.output_shape
+
+    def forward(self, Z, training=True):
+        self.layer_input = Z
+        batch_size= Z.shape[-1]
+        shape = (self.output_shape[0], batch_size)
+        return self.layer_input.reshape(shape)
+
+    def backward(self, dA):
+        batch_size= dA.shape[-1]
+        shape = (self.input_shape[0], self.input_shape[1], batch_size)
+        return dA.reshape(shape)

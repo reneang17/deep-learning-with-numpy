@@ -13,42 +13,40 @@ def vectorized_result(y):
     e[y] = 1.0
     return e
 
-def load_mnist():
-    if not os.path.exists(os.path.join(os.curdir, "data_mnist")):
-        os.mkdir(os.path.join(os.curdir, "data_mnist"))
-        wget.download("http://deeplearning.net/data/mnist/mnist.pkl.gz", out="data_mnist")
+from tensorflow import keras
 
-    data_file = gzip.open(os.path.join(os.curdir, "data_mnist", "mnist.pkl.gz"), "rb")
-    train_data, val_data, test_data = pickle.load(data_file, encoding="latin1")
-    data_file.close()
+def load_dataset(flatten=False):
+    (X_train, y_train), (X_test, y_test) = keras.datasets.mnist.load_data()
 
-    train_inputs = np.array([np.reshape(x, (784, 1)) for x in train_data[0]])
-    train_results = np.array([vectorized_result(y) for y in train_data[1]])
-    train_data  = train_inputs.squeeze().T, \
-    train_results.squeeze().T
+    # normalize x
+    X_train = X_train.astype(float) / 255.
+    X_test = X_test.astype(float) / 255.
 
-    val_inputs = np.array([np.reshape(x, (784, 1)) for x in val_data[0]])
-    val_results = np.array([vectorized_result(y) for y in val_data[1]])
-    val_data  = val_inputs.squeeze().T, \
-    val_results.squeeze().T
+    y_train = np.array([vectorized_result(y) for y in y_train])
+    y_test = np.array([vectorized_result(y) for y in y_test])
 
-    test_inputs = np.array([np.reshape(x, (784, 1)) for x in test_data[0]])
-    test_results = np.array([vectorized_result(y) for y in test_data[1]])
-    test_data  = test_inputs.squeeze().T, \
-    test_results.squeeze().T
-
-    return train_data, val_data, test_data
+    y_train = np.transpose(y_train.squeeze(),(1,0))
+    y_test = np.transpose(y_test.squeeze(),(1,0))
 
 
-train_data, val_data, test_data = load_mnist()
+    #reshape
+    X_train = np.transpose(X_train, (1, 2, 0))
+    X_test = np.transpose(X_test, (1, 2, 0))
 
-train_x , train_y = train_data
-val_x , val_y = val_data
-test_x , test_y = test_data
+    # we reserve the last 10000 training examples for validation
+    X_train, X_val = X_train[:, :, :-10000], X_train[:, :, -10000:]
+    y_train, y_val = y_train[:, :-10000], y_train[:, -10000:]
 
+    if flatten:
+        X_train = X_train.reshape((28*28, X_train.shape[-1]))
+        X_val = X_val.reshape((28*28, X_val.shape[-1]))
+        X_test = X_test.reshape((28*28, X_test.shape[-1]))
+
+    return X_train, y_train, X_val, y_val, X_test, y_test
+
+train_x, train_y, val_x, val_y, test_x, test_y = load_dataset(True)
 
 # Building network
-
 from main_class import *
 from layers import *
 from loss_functions import *
