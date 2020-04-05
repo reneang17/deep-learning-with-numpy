@@ -62,10 +62,14 @@ np.random.seed(1)
 
 n_x = 784    # num_px * num_px * 3
 lr = 0.05    # num_px * num_px * 3
-md.add(Flatten(input_shape = (28, 28, 1,)))
-md.add(Dense(100, initializer = 'normal', lr = lr))
+md.add(Conv2D(input_shape= (28,28,1) , f = 3, n_C = 17, stride =2, padding = 1, lr = lr))
 md.add(Activation('relu'))
-md.add(Dense(200, initializer = 'normal', lr = lr))
+md.add(Conv2D(f = 4, n_C = 11, stride =2, padding = 2, lr = lr))
+md.add(Activation('relu'))
+md.add(Flatten())
+md.add(Dense(50, initializer = 'normal', lr = lr))
+md.add(Activation('relu'))
+md.add(Dense(100, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 md.add(Dense(10, initializer = 'normal', lr = lr))
 md.add(Activation_SoftMax())
@@ -73,7 +77,7 @@ md.add(Activation_SoftMax())
 md.print_network()
 
 #train
-hist = md.fit(train_x, train_y, n_epochs=25, batch_size=32)
+hist = md.fit(train_x, train_y, n_epochs=5, batch_size=32)
 
 def softmax(x):
         e_x = np.exp(x )
@@ -96,10 +100,14 @@ md=NeuralNetwork(SoftmaxCrossEntropy)
 np.random.seed(1)
 lr = 0.05
 n_x = 784    # num_px * num_px * 3
-md.add(Flatten(input_shape = (28, 28, 1,)))
-md.add(Dense(100, initializer = 'normal', lr = lr))
+md.add(Conv2D(input_shape= (28,28,1) , f = 3, n_C = 17, stride =2, padding = 1, lr = lr))
 md.add(Activation('relu'))
-md.add(Dense(200, initializer = 'normal', lr = lr))
+md.add(Conv2D(f = 4, n_C = 11, stride =2, padding = 2, lr = lr))
+md.add(Activation('relu'))
+md.add(Flatten())
+md.add(Dense(50, initializer = 'normal', lr = lr))
+md.add(Activation('relu'))
+md.add(Dense(100, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 md.add(Dense(10, initializer = 'normal', lr = lr))
 
@@ -107,7 +115,7 @@ md.print_network()
 
 
 #train
-hist = md.fit(train_x, train_y, n_epochs=25, batch_size=32)
+hist = md.fit(train_x, train_y, n_epochs=5, batch_size=32)
 
 def softmax(x):
         e_x = np.exp(x )
