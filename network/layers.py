@@ -215,6 +215,7 @@ class Conv2D():
         self.n_C = n_C
         self.layer_input =None
         self.trainable = True
+        self.lr = lr
 
     def initialize(self):
         wshape = (self.f, self.f, self.input_shape[2], self.n_C)
@@ -261,9 +262,9 @@ class Conv2D():
 
     def backward(self, dZ):
         #dZ (n_H, n_W, n_C, m)
-        dA_prev = np.zeros((m, n_H_prev, n_W_prev, n_C_prev))
-        dW = np.zeros((f, f, n_C_prev, n_C))
-        db = np.zeros((1,1,1,n_C))
+
+        dW = np.zeros((self.f, self.f, self.input_shape[2], self.n_C))
+        db = np.zeros((1,1,1,self.n_C))
 
         dA_prev_pad = np.zeros(self.A_prev_pad.shape)
 
@@ -278,15 +279,16 @@ class Conv2D():
                 A_slice = self.layer_input[vert_start:vert_end,horiz_start:horiz_end, ...] # (f, f, n_C_prev, 1, m)
 
                 dA_prev_pad[vert_start:vert_end, horiz_start:horiz_end, :] += \
-                np.sum(self.W[..., np.newaxis] *dZ[h: h+1, w: w+1, ...][..., np.newaxis, :], axis = -1) #(f, f, n_C_prev, n_C, 1)* (1, 1, 1, n_C, m)
-                dW += np.mean(A_slice * dZ[h: h+1, w: w+1,...][..., np.newaxis,:], axis = -1) #(f, f, n_C_prev, 1, m) * (1,1,1, n_C, m)
+                np.sum(self.W[..., np.newaxis] * ((dZ[h:h+1, w:w+1, ...])[:, :, np.newaxis, :]), axis = -2) #(f, f, n_C_prev, n_C, 1)* (1, 1, 1, n_C, m)
+
+                dW += np.mean(A_slice * (dZ[h: h+1, w: w+1,...][:,:,np.newaxis,:, :]), axis = -1) #(f, f, n_C_prev, 1, m) * (1,1,1, n_C, m)
                 db += np.mean(dZ[h, w,...], axis= -1).reshape((1,1,1,self.n_C))
 
         if self.trainable:
             self.W = self.W - self.lr * dW
             self.b = self.b - self.lr * db
 
-        dA_prev = dA_prev_pad[pad:-pad, pad:-pad, ...]
+        dA_prev = dA_prev_pad[self.pad:-self.pad, self.pad:-self.pad, ...]
 
         assert(dA_prev.shape == self.A_prev_shape) # (n_H_prev, n_W_prev, n_C_prev, m)
 
