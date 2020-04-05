@@ -33,14 +33,10 @@ class Dense(Layer):
         self.trainable = True
         self.initializer = initializer
         self.lshape = None
-
         self.lr = lr
         self.W = None
         self.b = None
 
-        # For debugging
-        self.dW = None
-        self.db = None
 
     def get_output_shape(self):
         return self.output_shape
@@ -62,7 +58,6 @@ class Dense(Layer):
         #assert(self.b.shape == (self.out_units, 1))
 
     def forward(self, A_prev, training=True): #what is training=True for?
-
         self.layer_input = A_prev
         self.Z= np.dot((self.W), A_prev) + self.b
         #print(self.W.shape, self.b.shape)
@@ -199,3 +194,71 @@ class Flatten(Layer):
         batch_size= dA.shape[-1]
         shape = self.input_shape+(batch_size,)
         return dA.reshape(shape)
+
+
+
+class Conv2D():
+    """A layer that flattens a 2D matrix
+    Parameters:
+    -----------
+    name: string
+        The name of the activation function that will be used.
+    """
+
+    def __init__(self, input_shape= None, f = 2, n_C = 1, stride =1, padding = 0, initializer = 'normal'):
+        self.layer_name= 'Conv2D'
+        self.f = f
+        self.initializer = initializer
+        self.stride = stride
+        self.pad =  padding
+        self.input_shape = input_shape
+        self.n_C = n_C
+        self.layer_input =None
+
+    def initialize(self):
+        wshape = (self.f, self.f, self.input_shape[2], self.n_C)
+        if self.initializer == 'normal':
+            lim = np.sqrt(6) / math.sqrt(wshape[0]+wshape[1])
+            self.W  = np.random.uniform(-lim, lim, wshape)
+        self.b = np.zeros(shape = (1, 1, 1, self.n_C))
+        self.get_output_shape()
+
+    def get_output_shape(self):
+        n_H = int((self.input_shape[0] - self.f + 2 * self.pad) / self.stride) + 1
+        n_W = int((self.input_shape[1] - self.f + 2 * self.pad) / self.stride) + 1
+        self.output_shape = (n_H, n_W, self.n_C )
+        return self.output_shape
+
+
+
+    def forward(self, A_prev):
+
+
+        padding_shape = ((self.pad, self.pad), (self.pad,self.pad), (0,0), (0,0))
+        A_prev_pad = np.pad(A_prev, padding_shape , 'constant', constant_values = (0,0))
+        self.layer_input = A_prev_pad[...,np.newaxis,:] #inserted axis to allow for matrix multiplication
+
+        Z = np.zeros((*self.output_shape , A_prev.shape[-1])) # Start output matrix
+        Z_ishape =  Z.shape
+
+
+
+
+        for h in range(0, self.output_shape[0]):           # loop over vertical axis of the output volume
+            for w in range(0, self.output_shape[1]):       # loop over horizontal axis of the output volume
+                # Find the corners of the current "slice" (≈4 lines)
+                vert_start = h * self.stride
+                vert_end = vert_start + self.f
+                horiz_start = w * self.stride
+                horiz_end = horiz_start + self.f
+
+                A_slice_input = self.layer_input[vert_start: vert_end, horiz_start:horiz_end, ...]
+                arr = (np.multiply(A_slice_input, self.W[..., np.newaxis] )) +self.b[..., np.newaxis]
+                Z[h, w, ...] = arr.sum(axis=tuple(range(arr.ndim - 2))) # sums everything except the last two dims
+
+        assert Z_ishape == Z.shape, 'Dimensions in convolution do not match'
+
+        return Z
+
+    def backward(self, dZ):
+        pass
