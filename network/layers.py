@@ -205,7 +205,7 @@ class Conv2D():
         The name of the activation function that will be used.
     """
 
-    def __init__(self, input_shape= None, f = 2, n_C = 1, stride =1, padding = 0, initializer = 'normal'):
+    def __init__(self, input_shape= None, f = 2, n_C = 1, stride =1, padding = 0, initializer = 'normal',  lr = 0.06):
         self.layer_name= 'Conv2D'
         self.f = f
         self.initializer = initializer
@@ -214,6 +214,7 @@ class Conv2D():
         self.input_shape = input_shape
         self.n_C = n_C
         self.layer_input =None
+        self.trainable = True
 
     def initialize(self):
         wshape = (self.f, self.f, self.input_shape[2], self.n_C)
@@ -231,18 +232,16 @@ class Conv2D():
 
 
 
-    def forward(self, A_prev):
+    def forward(self, A_prev, training = True):
 
-
+        self.A_prev_shape = A_prev.shape #
         padding_shape = ((self.pad, self.pad), (self.pad,self.pad), (0,0), (0,0))
         A_prev_pad = np.pad(A_prev, padding_shape , 'constant', constant_values = (0,0))
+        self.A_prev_pad = A_prev_pad
         self.layer_input = A_prev_pad[...,np.newaxis,:] #inserted axis to allow for matrix multiplication
 
         Z = np.zeros((*self.output_shape , A_prev.shape[-1])) # Start output matrix
         Z_ishape =  Z.shape
-
-
-
 
         for h in range(0, self.output_shape[0]):           # loop over vertical axis of the output volume
             for w in range(0, self.output_shape[1]):       # loop over horizontal axis of the output volume
@@ -261,4 +260,34 @@ class Conv2D():
         return Z
 
     def backward(self, dZ):
-        pass
+        #dZ (n_H, n_W, n_C, m)
+        dA_prev = np.zeros((m, n_H_prev, n_W_prev, n_C_prev))
+        dW = np.zeros((f, f, n_C_prev, n_C))
+        db = np.zeros((1,1,1,n_C))
+
+        dA_prev_pad = np.zeros(self.A_prev_pad.shape)
+
+        for h in range(self.output_shape[0]):        # loop over vertical axis of the output volume
+            for w in range(self.output_shape[1]):    # loop over horizontal axis of the output volume
+                # Find the corners of the current "slice"
+                vert_start = h * self.stride
+                vert_end = vert_start + self.f
+                horiz_start = w * self.stride
+                horiz_end = horiz_start + self.f
+
+                A_slice = self.layer_input[vert_start:vert_end,horiz_start:horiz_end, ...] # (f, f, n_C_prev, 1, m)
+
+                dA_prev_pad[vert_start:vert_end, horiz_start:horiz_end, :] += \
+                np.sum(self.W[..., np.newaxis] *dZ[h: h+1, w: w+1, ...][..., np.newaxis, :], axis = -1) #(f, f, n_C_prev, n_C, 1)* (1, 1, 1, n_C, m)
+                dW += np.mean(A_slice * dZ[h: h+1, w: w+1,...][..., np.newaxis,:], axis = -1) #(f, f, n_C_prev, 1, m) * (1,1,1, n_C, m)
+                db += np.mean(dZ[h, w,...], axis= -1).reshape((1,1,1,self.n_C))
+
+        if self.trainable:
+            self.W = self.W - self.lr * dW
+            self.b = self.b - self.lr * db
+
+        dA_prev = dA_prev_pad[pad:-pad, pad:-pad, ...]
+
+        assert(dA_prev.shape == self.A_prev_shape) # (n_H_prev, n_W_prev, n_C_prev, m)
+
+        return dA_prev
