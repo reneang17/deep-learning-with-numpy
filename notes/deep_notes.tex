@@ -359,16 +359,24 @@ The initial condition is
 \begin{eqnarray}
     &\dd \theta^{[L]}_{j_L j_{L-1}}= \frac{\partial J }{\partial  \nt{j_L}{\mu}{L}  } =
    \left( -  \frac{y_i }{ \hat{y}_i} \right)
-   \left(  \frac{ \partial \hat{y}_i}{\partial z_k^{[L]} }    \right)
-   \left(   \frac{ \partial z_k^{[L]} } {\partial  \nt{j_L}{j_{L-1}}{L}  }  \right) 
+   \left(  \frac{ \partial \hat{y}_i}{\partial z_{j_L}^{[L]} }    \right)
+   \left(   \frac{ \partial z_{j_L}^{[L]} } {\partial  \nt{j_L}{j_{L-1}}{L}  }  \right) 
+   \label{eq:softmaxp1}
 \end{eqnarray}
 
 \begin{align}
- \frac{ \partial \hat{y}_i}{\partial z_k^{[L]} } =\hat{y}_i(  \delta_{ik} -   \hat{y}_k) 
+ \frac{ \partial \hat{y}_i}{\partial z_{j_L}^{[L]} } =\hat{y}_i(  \delta_{i j_L} -   \hat{y}_{j_L}) 
+ \label{eq:softmaxp2}
 \end{align}
 \begin{align}
-\frac{ \partial z_j^{[L]} } {\partial  \nt{j_L}{j_{L-1}}{L}  }  =  a^{L-1}_{j_{L-1}}
+\frac{ \partial z_{j_L}^{[L]} } {\partial  \nt{j_L}{j_{L-1}}{L}  }  =  a^{L-1}_{j_{L-1}}
+\label{eq:softmaxp3}
 \end{align}
+Note that after summing over $i$, the first two terms in \eqref{eq:softmaxp1} simplify as:
+\begin{eqnarray}
+   \left( -  \frac{y_i }{ \hat{y}_i} \right) \left(  \frac{ \partial \hat{y}_i}{\partial z_{j_L}^{[L]} }    \right) = - y_i + \hat{y}_i
+\end{eqnarray}
+
 
 *******************************************************
 
