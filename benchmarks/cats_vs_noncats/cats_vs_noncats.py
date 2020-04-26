@@ -13,10 +13,6 @@ import sys
 import matplotlib.pyplot
 
 
-
-
-
-
 plt.rcParams['figure.figsize'] = (5.0, 4.0) # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
 plt.rcParams['image.cmap'] = 'gray'
@@ -35,6 +31,7 @@ train_x_orig, train_y, test_x_orig, test_y, classes = load_data()
 
 
 # Explore your dataset
+train_y, test_y = train_y.T , test_y.T
 m_train = train_x_orig.shape[0]
 num_px = train_x_orig.shape[1]
 m_test = test_x_orig.shape[0]
@@ -49,8 +46,8 @@ print ("test_y shape: " + str(test_y.shape))
 
 print('After Standardize and reshape:')
 # Reshape the training and test examples
-train_x_flatten = train_x_orig.reshape(train_x_orig.shape[0], -1).T   # The "-1" makes reshape flatten the remaining dimensions
-test_x_flatten = test_x_orig.reshape(test_x_orig.shape[0], -1).T
+train_x_flatten = train_x_orig.reshape(train_x_orig.shape[0], -1)   # The "-1" makes reshape flatten the remaining dimensions
+test_x_flatten = test_x_orig.reshape(test_x_orig.shape[0], -1)
 
 # Standardize data to have feature values between 0 and 1.
 train_x = train_x_flatten/255.
@@ -58,6 +55,8 @@ test_x = test_x_flatten/255.
 
 print ("train_x's shape: " + str(train_x.shape))
 print ("test_x's shape: " + str(test_x.shape))
+
+#Define model
 
 #Define model
 
@@ -78,23 +77,24 @@ md=NeuralNetwork(CrossEntropy)
 np.random.seed(1)
 lr = 0.0075
 
-md.add(Dense(n_h1, input_shape=(n_x,), initializer = 'ng', lr = lr))
+md.add(Dense(n_h1, input_shape=(n_x,), initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 
-md.add(Dense(n_h2, initializer = 'ng', lr = lr))
+md.add(Dense(n_h2, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 
-md.add(Dense(n_h3, initializer = 'ng', lr = lr))
+md.add(Dense(n_h3, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 
-md.add(Dense(n_y, initializer = 'ng', lr = lr))
+md.add(Dense(n_y, initializer = 'normal', lr = lr))
 md.add(Activation('sigmoid'))
+
 
 #Print_network shape
 md.print_network()
 
 # Train
-train, val = md.fit(train_x, train_y, n_epochs=1800, batch_size=32)
+train, val = md.fit(train_x, train_y, n_epochs=200, batch_size=32)
 
 #Evaluate
 pred =md.predict(train_x)
@@ -138,7 +138,7 @@ my_label_y = 0 # the true class of your image (1 -> cat, 0 -> non-cat)
 fname = "images/" + my_image
 image = np.array(imageio.imread(fname))
 #image = np.array(imageio.imread(fname))
-my_image = np.array(Image.fromarray(image).resize((num_px,num_px))).reshape((num_px*num_px*3,1))
+my_image = np.array(Image.fromarray(image).resize((num_px,num_px))).reshape((1,num_px*num_px*3))
 #my_image = scipy.misc.imresize(image, size=(num_px,num_px)).reshape((num_px*num_px*3,1))
 my_image = my_image/255.
 my_predicted_image = md.predict(my_image)>=0.5
@@ -151,7 +151,7 @@ my_label_y = 0 # the true class of your image (1 -> cat, 0 -> non-cat)
 fname = "images/" + my_image
 image = np.array(imageio.imread(fname))
 #image = np.array(imageio.imread(fname))
-my_image = np.array(Image.fromarray(image).resize((num_px,num_px))).reshape((num_px*num_px*3,1))
+my_image = np.array(Image.fromarray(image).resize((num_px,num_px))).reshape((1,num_px*num_px*3))
 #my_image = scipy.misc.imresize(image, size=(num_px,num_px)).reshape((num_px*num_px*3,1))
 my_image = my_image/255.
 my_predicted_image = md.predict(my_image)>=0.5

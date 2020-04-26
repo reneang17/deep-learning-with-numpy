@@ -20,9 +20,7 @@ class Layer(object):
 
 
 class Dense(Layer):
-    """A fully-connected NN layer without activation func
-    out_units: int, Number of neurons in the layer.
-    input_shape: tuple, The expected input shape of the layer.
+    """A fully-connected layer
     """
     def __init__(self, out_units, input_shape=None, initializer = 'normal', lr = 0.06):
         self.layer_name ='dense'
@@ -42,45 +40,43 @@ class Dense(Layer):
         return self.output_shape
 
     def initialize(self):
-        """ Initialize the weights
+        """ Initialize the weights. Unchanged
         """
-        wshape = (self.output_shape[0], self.input_shape[0])
+        wshape = (self.input_shape[0], self.output_shape[0])
+
         if self.initializer == 'normal':
             lim = np.sqrt(6) / math.sqrt(wshape[0]+wshape[1])
             self.W  = np.random.uniform(-lim, lim, wshape)
 
-        if self.initializer == 'ng':
-            self.W  = np.random.randn(wshape[0], wshape[1]) / np.sqrt(wshape[1])
-
-        self.b = np.zeros(shape = (wshape[0], 1))
+        self.b = np.zeros(shape = (1, wshape[1]))
         #crosschecks
-        #assert(self.W.shape == (self.out_units, self.input_shape[0]))
-        #assert(self.b.shape == (self.out_units, 1))
+        assert self.W.shape == (self.input_shape[0], self.out_units)
+        assert(self.b.shape == (1,self.out_units))
 
     def forward(self, A_prev, training=True): #what is training=True for?
         self.layer_input = A_prev
-        self.Z= np.dot((self.W), A_prev) + self.b
-        #print(self.W.shape, self.b.shape)
-        assert(self.Z.shape == (self.W.shape[0], A_prev.shape[1]))
+        self.Z= np.matmul(A_prev, self.W) + self.b
+        assert self.Z.shape == (A_prev.shape[0], self.W.shape[1])
         return self.Z
 
     def backward(self, dZ):
-        # Save weights used during forwards pass
-        W = self.W
+        # Input dZ_prev = dl/dZ_prev
+        # Output dL/dA = dL/dZ * dZ/dA  = dL/dZ * W^T
+
         A_prev = self.layer_input
-        norm= A_prev.shape[-1]
 
         if self.trainable:
-            # Calculate gradient w.r.t layer weights
-            dW = np.dot(dZ, A_prev.T)/norm #(2)normalize
-            db = np.sum(dZ, axis=1, keepdims=True)/norm #(2)normalize
-            #self.dW = dW # No need to safe
-            #self.db = db
-            # Update the layer weights
+            # Gradiend update dW= dL/dW = dz/dw * dl/dz = A_prev^T dL/dz
+            # Gradiend update db= dL/bb = dz/db * dl/dz = dL/dz
+            dW = np.dot(A_prev.T, dZ)/A_prev.shape[0] #(2)normalize
+            db = np.mean(dZ, axis=0, keepdims=True) #(2)normalize
+            assert dW.shape == self.W.shape
+            assert db.shape == self.b.shape
             self.W = self.W - self.lr * dW
             self.b = self.b - self.lr * db
 
-        return np.dot(W.T, dZ) # return dA_prev
+        # Output dL/dA = dL/dZ * dZ/dA  = dL/dZ * W^T
+        return np.dot(dZ, self.W.T) # return dA_prev
 
 
 
@@ -113,17 +109,20 @@ class Activation(Layer):
 
     def forward(self, Z, training=True):
         self.layer_input = Z
-        return self.activation_func(Z)
+        act = self.activation_func(Z)
+        assert Z.shape == act.shape
+        return act
 
     def backward(self, dA):
         Z = self.layer_input
         dact = self.activation_func.gradient(Z)
         assert Z.shape == dact.shape
-
-        dZ = np.multiply(dA, dact)
+        dZ = dact * dA
         assert(dZ.shape == (Z.shape))
-
         return dZ
+
+##### Unchanged layer_input
+
 
 
 class Activation_SoftMax(Layer):
@@ -186,13 +185,13 @@ class Flatten(Layer):
         return self.output_shape
 
     def forward(self, Z, training=True):
-        batch_size= Z.shape[-1]
-        shape = (self.output_shape[0], batch_size)
+        batch_size= Z.shape[0]
+        shape = (batch_size, self.output_shape[0])
         return Z.reshape(shape)
 
     def backward(self, dA):
-        batch_size= dA.shape[-1]
-        shape = self.input_shape+(batch_size,)
+        batch_size= dA.shape[0]
+        shape = (batch_size,) + self.input_shape
         return dA.reshape(shape)
 
 

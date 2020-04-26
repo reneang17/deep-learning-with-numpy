@@ -24,8 +24,6 @@ class Relu():
         return np.where(Z >= 0, 1, 0)
 
 
-
-
 class Softmax():
     """
     Fordward/backward Softmax propagation

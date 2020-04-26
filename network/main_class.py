@@ -30,8 +30,6 @@ class NeuralNetwork():
             X, y = validation_data
             self.val_set = {"X": X, "y": y}
 
-
-
     def add(self, layer):
         """ Method which adds a layer to the neural network """
         # If not first layer added then set the input shape
