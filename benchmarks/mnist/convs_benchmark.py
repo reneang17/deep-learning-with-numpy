@@ -77,7 +77,7 @@ md.add(Activation_SoftMax())
 md.print_network()
 
 #train
-hist = md.fit(train_x, train_y, n_epochs=5, batch_size=32)
+hist = md.fit(train_x, train_y, n_epochs=8, batch_size=32)
 
 def softmax(x):
         e_x = np.exp(x )
@@ -115,7 +115,7 @@ md.print_network()
 
 
 #train
-hist = md.fit(train_x, train_y, n_epochs=5, batch_size=32)
+hist = md.fit(train_x, train_y, n_epochs=10, batch_size=32)
 
 def softmax(x):
         e_x = np.exp(x )
