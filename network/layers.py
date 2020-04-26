@@ -197,7 +197,7 @@ class Flatten(Layer):
 
 
 
-class Conv2D():
+class Conv2D(Layer):
     """A layer that flattens a 2D matrix
     Parameters:
     -----------
