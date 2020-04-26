@@ -130,32 +130,31 @@ def print_mislabeled_images(classes, X, y, p):
 #Better only do it on jupyter notebook
 #print_mislabeled_images(classes, test_x, test_y, pred_test)
 
+import imageio
 
-## START CODE HERE ##
+
 my_image = "my_image4.jpg" # change this to the name of your image file
 my_label_y = 0 # the true class of your image (1 -> cat, 0 -> non-cat)
-## END CODE HERE ##
-
 fname = "images/" + my_image
-image = np.array(ndimage.imread(fname, flatten=False))
-my_image = scipy.misc.imresize(image, size=(num_px,num_px)).reshape((num_px*num_px*3,1))
+image = np.array(imageio.imread(fname))
+#image = np.array(imageio.imread(fname))
+my_image = np.array(Image.fromarray(image).resize((num_px,num_px))).reshape((num_px*num_px*3,1))
+#my_image = scipy.misc.imresize(image, size=(num_px,num_px)).reshape((num_px*num_px*3,1))
 my_image = my_image/255.
 my_predicted_image = md.predict(my_image)>=0.5
-
 plt.imshow(image)
 plt.show()
 print ("y = " + str(np.squeeze(my_predicted_image)) + ", your predicts a \"" + classes[int(np.squeeze(my_predicted_image)),].decode("utf-8") +  "\" picture.")
 
 my_image = "my_image3.jpg" # change this to the name of your image file
 my_label_y = 0 # the true class of your image (1 -> cat, 0 -> non-cat)
-## END CODE HERE ##
-
 fname = "images/" + my_image
-image = np.array(ndimage.imread(fname, flatten=False))
-my_image = scipy.misc.imresize(image, size=(num_px,num_px)).reshape((num_px*num_px*3,1))
+image = np.array(imageio.imread(fname))
+#image = np.array(imageio.imread(fname))
+my_image = np.array(Image.fromarray(image).resize((num_px,num_px))).reshape((num_px*num_px*3,1))
+#my_image = scipy.misc.imresize(image, size=(num_px,num_px)).reshape((num_px*num_px*3,1))
 my_image = my_image/255.
 my_predicted_image = md.predict(my_image)>=0.5
-
 plt.imshow(image)
 plt.show()
 print ("y = " + str(np.squeeze(my_predicted_image)) + ", your predicts a \"" + classes[int(np.squeeze(my_predicted_image)),].decode("utf-8") +  "\" picture.")
