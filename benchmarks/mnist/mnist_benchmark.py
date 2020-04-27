@@ -22,30 +22,23 @@ def load_dataset(flatten=False, unsqueeze = False):
     X_train = X_train.astype(float) / 255.
     X_test = X_test.astype(float) / 255.
 
-    y_train = np.array([vectorized_result(y) for y in y_train])
-    y_test = np.array([vectorized_result(y) for y in y_test])
-
-    y_train = np.transpose(y_train.squeeze(),(1,0))
-    y_test = np.transpose(y_test.squeeze(),(1,0))
-
-
-    #reshape
-    X_train = np.transpose(X_train, (1, 2, 0))
-    X_test = np.transpose(X_test, (1, 2, 0))
+    y_train = np.array([vectorized_result(y) for y in y_train]).squeeze()
+    y_test = np.array([vectorized_result(y) for y in y_test]).squeeze()
 
     # we reserve the last 10000 training examples for validation
-    X_train, X_val = X_train[:, :, :-10000], X_train[:, :, -10000:]
-    y_train, y_val = y_train[:, :-10000], y_train[:, -10000:]
+    X_train, X_val = X_train[:-10000,...], X_train[-10000:,...]
+    y_train, y_val = y_train[:-10000,...], y_train[-10000:,...]
+
 
     if flatten:
-        X_train = X_train.reshape((28*28, X_train.shape[-1]))
-        X_val = X_val.reshape((28*28, X_val.shape[-1]))
-        X_test = X_test.reshape((28*28, X_test.shape[-1]))
+        X_train = X_train.reshape((X_train.shape[0], 28*28))
+        X_val = X_val.reshape((X_test.shape[0], 28*28))
+        X_test = X_test.reshape((X_val.shape[0], 28*28))
 
     if unsqueeze:
-        X_train = X_train.reshape((28, 28, 1, X_train.shape[-1]))
-        X_val = X_val.reshape((28,28, 1, X_val.shape[-1]))
-        X_test = X_test.reshape((28,28, 1, X_test.shape[-1]))
+        X_train = X_train[:,np.newaxis, :,:]
+        X_val = X_val[:,np.newaxis, :,:]
+        X_test = X_test[:,np.newaxis, :,:]
 
     return X_train, y_train, X_val, y_val, X_test, y_test
 
@@ -60,9 +53,9 @@ print('MultiClassCrossEntropy')
 md=NeuralNetwork(MultiClassCrossEntropy)
 np.random.seed(1)
 
-n_x = 784    # num_px * num_px * 3
+n_x = 28*28    # num_px * num_px * 3
 lr = 0.05    # num_px * num_px * 3
-md.add(Flatten(input_shape = (28, 28, 1,)))
+md.add(Flatten(input_shape = (1, 28, 28)))
 md.add(Dense(100, initializer = 'normal', lr = lr))
 md.add(Activation('relu'))
 md.add(Dense(200, initializer = 'normal', lr = lr))
@@ -76,13 +69,13 @@ md.print_network()
 hist = md.fit(train_x, train_y, n_epochs=25, batch_size=32)
 
 def softmax(x):
-        e_x = np.exp(x )
-        return e_x / np.sum(e_x, axis=0, keepdims=True)
+        e_x = np.exp(x)
+        return e_x / np.sum(e_x, axis=1, keepdims=True)
 
 def accuracy(test_x, test_y):
     preds = md.predict(test_x)
-    preds = np.array([y for y in np.argmax(preds, axis=0)]).squeeze()
-    test_y_ = np.array([y for y in np.argmax(test_y, axis=0)]).squeeze()
+    preds = np.array([y for y in np.argmax(preds, axis=1)]).squeeze()
+    test_y_ = np.array([y for y in np.argmax(test_y, axis=1)]).squeeze()
     return np.mean(preds == test_y_)
 
 ## Evalaution
@@ -110,13 +103,13 @@ md.print_network()
 hist = md.fit(train_x, train_y, n_epochs=25, batch_size=32)
 
 def softmax(x):
-        e_x = np.exp(x )
-        return e_x / np.sum(e_x, axis=0, keepdims=True)
+        e_x = np.exp(x)
+        return e_x / np.sum(e_x, axis=1, keepdims=True)
 
 def accuracy(test_x, test_y):
-    preds = softmax(md.predict(test_x))
-    preds = np.array([y for y in np.argmax(preds, axis=0)]).squeeze()
-    test_y_ = np.array([y for y in np.argmax(test_y, axis=0)]).squeeze()
+    preds = md.predict(test_x)
+    preds = np.array([y for y in np.argmax(preds, axis=1)]).squeeze()
+    test_y_ = np.array([y for y in np.argmax(test_y, axis=1)]).squeeze()
     return np.mean(preds == test_y_)
 
 ## Evalaution
