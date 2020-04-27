@@ -58,7 +58,8 @@ class MultiClassCrossEntropy(Loss):
         self.loss_name = 'MultiClassCrossEntropy'
 
     def loss(self, y, AL):
-        return -np.sum(y * np.log(AL) ,axis= 0, keepdims = True) #/(y.shape[-1])#(1)normalize in main
+        #assert AL.shape[0] - 10**(-13) <np.abs(np.sum(AL)) < AL.shape[0] + 10**(-13), print(AL, 1)
+        return -np.sum(y * np.log(AL), axis= 1, keepdims = True) #/(y.shape[-1])#(1)normalize in main
 
     def gradient(self, y, AL):
         # Avoid division by zero
@@ -75,16 +76,16 @@ class SoftmaxCrossEntropy(Loss):
     def loss(self, y, Z):
         # Avoid division by zero
         Z_aux = Z.shape
-        Z = Z - np.max(Z, axis = 0, keepdims=True)
+        Z = Z - np.max(Z, axis = 1, keepdims=True)
         assert Z_aux ==Z.shape
 
-        log_e_Z = Z- np.log(np.sum( np.exp(Z), axis=0, keepdims=True))
-        return (-np.sum( y * log_e_Z ,axis= 0))  # (1)normalize in main
+        log_e_Z = Z- np.log(np.sum( np.exp(Z), axis=1, keepdims=True))
+        return (-np.sum( y * log_e_Z ,axis= 1))  # (1)normalize in main
 
 
     def gradient(self, y, Z):
-        Z -= np.max(Z, axis = 0, keepdims=True)
-        p = np.exp(Z)/ np.sum( np.exp(Z), axis=0, keepdims=True)
+        Z -= np.max(Z, axis = 1, keepdims=True)
+        p = np.exp(Z)/ np.sum( np.exp(Z), axis=1, keepdims=True)
 
         # Avoid division by zero
         return  (-y + p)  #(2)Normalize when updating grad

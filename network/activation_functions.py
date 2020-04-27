@@ -31,13 +31,15 @@ class Softmax():
     """
     def __call__(self, Z):
         e_Z = np.exp(Z)
-
-        return e_Z / np.sum(e_Z, axis=0, keepdims=True)
+        out = e_Z / np.sum(e_Z, axis=1, keepdims=True)
+        #assert Z.shape[0] - 10**(-13) <np.sum(out) < Z.shape[0] + 10**(-13), print(Z, e_Z )
+        assert Z.shape == out.shape
+        return out
 
     def gradient(self, Z):
         p = self.__call__(Z)
-        grad = - p[:, np.newaxis, :] *  p[np.newaxis, :, :]
-        diag = np.arange(p.shape[0])
-        grad[diag, diag, :]  = p * (1-p)
+        grad = - p[:, :, np.newaxis] *  p[:, np.newaxis, :]
+        diag = np.arange(p.shape[-1])
+        grad[:, diag, diag]  = p * (1-p)
 
         return grad

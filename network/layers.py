@@ -48,35 +48,37 @@ class Dense(Layer):
             lim = np.sqrt(6) / math.sqrt(wshape[0]+wshape[1])
             self.W  = np.random.uniform(-lim, lim, wshape)
 
+        if self.initializer == 'ng':
+            self.W  = np.random.randn(wshape[0], wshape[1]) / np.sqrt(wshape[0])
+
         self.b = np.zeros(shape = (1, wshape[1]))
-        #crosschecks
-        assert self.W.shape == (self.input_shape[0], self.out_units)
-        assert(self.b.shape == (1,self.out_units))
+        assert self.W.shape == (wshape[0], self.out_units)
+        assert (self.b.shape == (1,self.out_units))
 
     def forward(self, A_prev, training=True): #what is training=True for?
         self.layer_input = A_prev
-        self.Z= np.matmul(A_prev, self.W) + self.b
+        self.Z= np.dot(A_prev, self.W) + self.b
         assert self.Z.shape == (A_prev.shape[0], self.W.shape[1])
         return self.Z
 
     def backward(self, dZ):
         # Input dZ_prev = dl/dZ_prev
         # Output dL/dA = dL/dZ * dZ/dA  = dL/dZ * W^T
-
+        W = self.W
         A_prev = self.layer_input
-
+        norm=A_prev.shape[0]
         if self.trainable:
             # Gradiend update dW= dL/dW = dz/dw * dl/dz = A_prev^T dL/dz
             # Gradiend update db= dL/bb = dz/db * dl/dz = dL/dz
-            dW = np.dot(A_prev.T, dZ)/A_prev.shape[0] #(2)normalize
-            db = np.mean(dZ, axis=0, keepdims=True) #(2)normalize
-            assert dW.shape == self.W.shape
+            dW = np.dot(A_prev.T, dZ)/norm #(2)normalize
+            db = np.sum(dZ, axis=0, keepdims=True)/norm #(2)normalize
+            assert dW.shape == W.shape
             assert db.shape == self.b.shape
             self.W = self.W - self.lr * dW
             self.b = self.b - self.lr * db
 
         # Output dL/dA = dL/dZ * dZ/dA  = dL/dZ * W^T
-        return np.dot(dZ, self.W.T) # return dA_prev
+        return np.dot(dZ, W.T) # return dA_prev
 
 
 
@@ -117,6 +119,7 @@ class Activation(Layer):
         Z = self.layer_input
         dact = self.activation_func.gradient(Z)
         assert Z.shape == dact.shape
+        assert Z.shape == dA.shape
         dZ = dact * dA
         assert(dZ.shape == (Z.shape))
         return dZ
@@ -147,17 +150,16 @@ class Activation_SoftMax(Layer):
         return self.output_shape
 
     def forward(self, Z, training=True):
+
         self.layer_input = Z
         return self.activation_func(Z)
 
     def backward(self, dA):
         Z = self.layer_input
         dact = self.activation_func.gradient(Z)
-        #assert Z.shape == dact.shape
-
-        dZ = np.sum(np.multiply(dA, dact), axis = 1)
+        #print(dact.shape, dA.shape , Z.shape)
+        dZ = np.sum(np.multiply(dact, dA[:, np.newaxis,:]), axis = 2)
         assert(dZ.shape == (Z.shape))
-
         return dZ
 
 

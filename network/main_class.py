@@ -48,6 +48,7 @@ class NeuralNetwork():
     def train_on_batch(self, X, y):
         """ Forward/backward on batch """
         y_pred = self._forward(X)
+
         loss = np.mean(self.loss_function.loss(y, y_pred))#(1)mean normalizes
         acc = self.loss_function.acc(y, y_pred)
         # Calculate the gradient of the loss function wrt y_pred
