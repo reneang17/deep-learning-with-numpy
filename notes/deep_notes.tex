@@ -1,20 +1,15 @@
 \documentclass[a4paper,11pt]{article}
-%\documentclass[showpacs,showkeys,aps,prd,nofootinbib,floatfix,amsmath,amssymb]{revtex4}
-%\usepackage{jheppub}
+
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{amsfonts}
-%\usepackage{epigraph}
+
 \usepackage{mathrsfs}
 \usepackage{graphics}
 \usepackage{graphicx}
 \usepackage{bm}
 \usepackage{bbm}
-\usepackage{dsfont}% Math Blackboard
-%\usepackage{tensor} 	% Tensor indices
-%\usepackage{slashed}	% Dirac Slash Notation
-%\usepackage{tikz,ifthen}% TikZ!
-%\usepackage[toc,page]{appendix}
+\usepackage{dsfont}
 \usepackage{braket}
 
 
@@ -34,7 +29,16 @@
 \newcommand{\na}[2]{a_{#1}^{[#2]}}
 \newcommand{\nb}[2]{b_{#1}^{[#2]}}
 \newcommand{\nz}[2]{z_{#1}^{[#2]}}
+
+\newcommand{\na}[3]{a_{#1 #2}^{[#2]}}
+
+\newcommand{\nz}[3]{z_{#1 #2}^{[#2]}}
+
+
 \newcommand{\nt}[3]{\theta_{#1 #2}^{[#3]}}
+
+\newcommand{\nt}[4]{\theta_{#1 #2 #3}^{[#4]}}
+
 \newcommand{\sg}{ \sigma_{\text{sigmoid}}}
 
 \newcommand{\ff}[2]{#1 \left(#2 \right)}
@@ -67,36 +71,36 @@
 
 In the lectures notes, one has $\theta^{[l]}_{\text{here}}=\theta^{[l-1]}_{\text{there}}$, where
 there refers to the machine learning learning course by Andrew.
-We do this change to make the connexion with the 
+We do this change to make the connexion with the
 deep learning specialization lectures.
 
 
 \section{Structure of dense layers}
 
-%In the lectures notes, one has 
+%In the lectures notes, one has
 %$\theta^{[l]}_{\text{here}}=\theta^{[l-1]}_{\text{there}}$.
-%We do this change to make the connexion with the 
+%We do this change to make the connexion with the
 %deep learning specialization lectures.
 
 \begin{equation}
-    \na{\mu}{0} \equiv \delta_{\mu0}+\delta_{\mu i} x_i %\label{eq:}
+    \na{\mu}{0} \equiv \delta_{0\mu}+x_i\delta_{i\mu}  %\label{eq:}
 \end{equation}
 
 \begin{equation}
-    \na{\mu}{l} \equiv \delta_{\mu0} +\delta_{\mu i }^{[l]}\,\,
-    \ff{g^{[l]}}{  \nt{i}{\nu}{l}\na{\nu }{l-1}  }  %\label{eq:}
+    \na{\mu}{l} \equiv \delta_{0\mu} +
+    \ff{g^{[l]}}{ \na{\nu }{l-1} \nt{\nu}{i}{l}  }\,\, \delta_{i\mu}^{[l]}  %\label{eq:}
 \end{equation}
 
 \begin{equation}
-    \nz{i}{l}\equiv \nt{i}{\nu}{l}\na{\nu }{l-1} %\label{eq:}
+    \nz{i}{l}\equiv\na{\nu }{l-1}  \nt{\nu}{i}{l} %\label{eq:}
 \end{equation}
 
-It should be understood that in $\na{i}{l}$ 
-one has  $i \in \{1,..., s_l\} $, 
+It should be understood that in $\na{i}{l}$
+one has  $i \in \{1,..., s_l\} $,
 and that in $\na{\mu}{l}$ one has $ \mu \in \{0,..., s_l\}$. The binary cross entropy cross function is
 
 \begin{equation}
-    cost=\frac1m \sum^m_n 
+    cost=\frac1m \sum^m_n
     J \Big\vert_{x=x_n,y=y_n}  %\label{eq:}
 \end{equation}
 where
@@ -105,7 +109,7 @@ where
     J\equiv -\sum^{s_L}_k
     \left(
         y_k\ff{\log}{\na{k}{L}}  %\label{eq:}
-        +(1-y_k)\ff{\log}{1-\na{k}{L}} 
+        +(1-y_k)\ff{\log}{1-\na{k}{L}}
     \right)
 \end{equation}
 
@@ -115,38 +119,18 @@ where
 
 \section{Backward propagation.  Recursion relation}
 
-
-
-%
-%To implement gradient descent we need 
-%the next partial derivatives ($l\in\{1,...,L\} $)
-%
-%\begin{equation}
-%    \frac{\partial J }{\partial  \nt{j_l}{\mu}{l}  } 
-%   =\frac{\partial J  }{\partial \na{j_L}{L} } \frac{\partial \na{j_L}{L} }{\partial \nz{j_L}{L} }
-%    \left(
-%    \frac{\partial \nz{j_L}{L}  }{\partial \na{j_{L-1}}{L-1}  }
-%    \cdots
-%    \frac{\partial \na{j_{l+1}}{l+1}   }{\partial \na{j_l}{l}   }
-%    \right)
-%    \frac{\partial \na{j_l}{l}   }{\partial \nz{j_l}{l}   }
-%    \frac{\partial \nz{j_l}{l} }
-%        {\partial \nt{j_l}{\mu}{l}  }
-%    %\label{eq:}
-%\end{equation}
-
 The following recursion relations do the job
 \begin{equation}
     \underbrace{
-    \frac{\partial J }{\partial  \nt{j_l}{j_{l-1}}{l}  }
-    }_{\dd  \nt{j_l}{j_{l-1}}{l} } 
+    \frac{\partial J }{\partial  \nt{j_{l-1}}{j_{l}}{l}  }
+    }_{\dd  \nt{j_{l-1}}{j_l}{l} }
    =
+   \underbrace{
+    \frac{\partial \nz{j_l}{l} }{\partial \nt{j_{l-1}}{j_l}{l}  }
+    }_{ \na{j_{l-1}}{l-1} }
    \underbrace{
     \frac{\partial J  }{\partial \nz{j_l}{l} }
     }_{\dd  \nz{j_{l}}{l} }
-    \underbrace{
-    \frac{\partial \nz{j_l}{l} }{\partial \nt{j_l}{j_{l-1}}{l}  }
-    }_{ \na{j_{l-1}}{l-1} }
     %\label{eq:}
 \end{equation}
 
@@ -157,157 +141,74 @@ The following recursion relations do the job
 \frac{\partial J  }{\partial \nz{j_l}{l}   }
 }_{\dd  \nz{j_{l}}{l} }
 	=
-	\underbrace{ 
-	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   } 
-	\frac{\partial \nz{j_{l+1}}{l+1}   }{ \partial \na{j_{l}}{l}  }
+	\underbrace{
+	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   }
+	\frac{\partial \nz{j_{l+1}}{l+1}}{\partial \na{j_{l}}{l}}
 	}_{\dd a_{j_l}^{[l]} }
 	\frac{\partial \na{j_{l}}{l}    }{ \partial \nz{j_{l}}{l}  }
 	=
 	\underbrace{
-	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   } 
-	 \nt{j_{l+1}}{j_l}{l+1}
-	 }_{ \dd a_{j_l}^{[l]}=(\theta^{[l+1]T})_{j_l j_{l+1}} \dd z_{j_{l+1}}^{[l+1]} }
+	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   }
+	 \nt{j_l}{j_{l+1}}{l+1}
+	 }_{ \dd a_{j_l}^{[l]}=\theta^{[l+1]}_{j_l j_{l+1}} \dd z_{j_{l+1}}^{[l+1]} }
 	 g^{[l]'}\left( z_{j_{l}}^{[l]}   \right)
 \end{equation}
 
 Hence, in an abbreviated notation one has:
 \begin{eqnarray}
-	&\dd  \nt{j_l}{j_{l-1}}{l} = \dd  \nz{j_{l}}{l}  \na{j_{l-1}}{l-1}\\
-	&\dd a_{j_{l-1}}^{[l-1]}=(\theta^{[l]T})_{j_{l-1} j_{l}} \dd z_{j_{l}}^{[l]}\\
+	&\dd  \nt{j_{l-1}}{j_l}{l} = \dd  \nz{j_{l}}{l}  \na{j_{l-1}}{l-1}\\
+	&\dd a_{j_{l}}^{[l]}=\theta^{[l+1]}_{j_{l} j_{l+1}} \dd z_{j_{l+1}}^{[l+1]}\\
 	&\dd  \nz{j_{l}}{l}= \dd a_{j_l}^{[l]} \,\, g^{[l]'}\left( z_{j_{l}}^{[l]}   \right)
 \end{eqnarray}
 
-Hence, by providing $\{ \dd a^{[l]}  , \theta^{[l]}\}$ one gets $\{ \dd  \nt{j_l}{\mu}{l}, \dd a_{j_{l-1}}^{[l-1]}\}$ and this process can be iterated. 
 The initial condition is
 
 
 \begin{eqnarray}
-    &\dd \theta^{[L]}_{j_L \mu}= \frac{\partial J }{\partial  \nt{j_L}{\mu}{L}  } =
+    &\dd \theta^{[L]}_{\mu j_L}= \frac{\partial J }{\partial  \nt{\mu}{j_L}{L}  } =
     \underbrace{
-    \frac{(\na{j_L}{L} -y_{j_L})}{\na{j_L}{L} (1-\na{j_L}{L-1} )} 
+    \frac{(\na{j_L}{L} -y_{j_L})}{\na{j_L}{L} (1-\na{j_L}{L-1} )}
     }_{\dd a_{j_{L}}^{[L]} }
     \,\, g^{[L]'} \left( z_{j_{L}}^{[L]} \right)
    \, \na{\mu}{L-1} \\
    & \dd z^{[L]}_{j_L }= \dd a_{j_{L}}^{[L]}\,
    g^{[L]'} \left( z_{j_{L}}^{[L]} \right)\\
-   &\dd \theta^{[L]}_{j_L \mu}=  \dd \nz{j_L }{L}\, \na{\mu}{L-1} 
+   &\dd \theta^{[L]}_{j_L \mu}=  \dd \nz{j_L }{L}\, \na{\mu}{L-1}
 \end{eqnarray}
 
 
 
-This layer actually simplifies because one chooses $g^{[L]}= \sg$, 
+This layer actually simplifies because one chooses $g^{[L]}= \sg$,
 which means that $\sg'= \sg (1- \sg) $.
 
 
-\section{Forward propagation convolutional neural networks}
 
-No padding case.
-%In the lectures notes, one has 
-%$\theta^{[l]}_{\text{here}}=\theta^{[l-1]}_{\text{there}}$.
-%We do this change to make the connexion with the 
-%deep learning specialization lectures.
-
-\begin{equation}
-    \na{ij}{0} \equiv x_{ij} %\label{eq:}
-\end{equation}
-
-\begin{equation}
-\nz{ij  }{l} = 
-    \nt{r}{s}{l} 
-    \na{(i S^{[l]}+r)(j S^{[l]}+s) }{l-1} 
-    +b^{[l]}\delta_{ij} 
-\end{equation}
-
-\begin{equation}
-    \na{ij}{l} \equiv \ff{g^{[l]}}{  
-    \nz{ij  }{l}   }  %\label{eq:}
-\end{equation}
-
-
-
-It should be understood that incides of the activation
-of the $l$ layer, $\na{ij}{l}$, run over 
-$i\in\{ 0,..., n_{H}^{[l]}-1  \}$ and $j\in\{ 0,..., n_{W}^{[l]} -1 \}$, where
-$n_{X}^{[l]}= (n_{X}^{[l-1]}-f^{[l]})/S^{[l]}+1$. Finally, the indices of the 
-weights of the $l$ layer, $\nt{r}{s}{l}$ , runs over $r,s\in \{0,..., f^{[l]}-1\}$.
-
-
-\section{Back prop}
-
-The following recursion relations do the job
-\begin{equation}
-    \underbrace{
-    \frac{\partial J }{\partial  \nt{r}{s}{l}  }
-    }_{\dd  \nt{r}{s}{l} } 
-   =
-   \underbrace{
-    \frac{\partial J  }{\partial \nz{ij}{l} }
-    }_{\dd  \nz{ij }{l} }\,\,\,\,  \times
-    \underbrace{
-    \frac{\partial \nz{ij}{l} }{\partial \nt{r}{s}{l}  }
-    }_{ \na{(iS^{[l]}+r)(jS^{[l]}+s)}{l} }
-    %\label{eq:}
-\end{equation}
-
-%\frac{ i-r}{S^{[l]}}\,  \frac{ j-s}{S^{[l]}} 
-
-\begin{align}
-\underbrace{
-\frac{\partial J  }{\partial \nz{ij }{l}   }
-}_{\dd  \nz{ij }{l} }
-	&=
-	\underbrace{ 
-	\frac{\partial J  }{\partial \nz{uv}{l+1}   } 
-	\frac{\partial \nz{uv}{l+1}   }{ \partial \na{ (uS^{[l]} +r )(vS^{[l]}+s)}{l}  }
-	\delta_{i (uS^{[l]} +r )} \delta_{j (vS^{[l]} +s )}
-	}_{\dd a_{ij}^{[l]} }
-	\frac{\partial \na{ij}{l}    }{ \partial \nz{ij}{l}  }
-	\\
-	&=
-	\underbrace{
-	\frac{\partial J  }{\partial \nz{ uv  }{l+1}   } 
-	 \nt{r}{s}{l+1}
-	 \delta_{i (uS^{[l]} +r )} \delta_{j (vS^{[l]} +s )}
-	 }_{\dd a_{ij}^{[l]}
-	 =\theta^{[l+1]}_{ rs} \dd z_{uv}^{[l+1]} 
-	  \delta_{i (uS^{[l]} +r )} \delta_{j (vS^{[l]} +s )}
-	 } 
-	 g^{[l]'}\left( z_{ij}   \right) 
-\end{align}
-
-Hence, in an abbreviated notation one has:
-\begin{eqnarray}
-	&\dd  \nt{j_l}{\mu}{l} = \dd  \nz{j_{l}}{l}  \na{j_{l-1}}{l-1}\\
-	&\dd a_{j_{l-1}}^{[l-1]}=(\theta^{[l]T})_{j_{l-1} j_{l}} \dd z_{j_{l}}^{[l]}\\
-	&\dd  \nz{j_{l}}{l}= \dd a_{j_l}^{[l]} \,\, g^{[l]'}\left( z_{j_{l}}^{[l]}   \right)
-\end{eqnarray}
-
-\section{Propagation with softmax }
+\section{Propagation with softmax}
 
 
 \begin{equation}
-    \na{\mu}{0} \equiv \delta_{\mu0}+\delta_{\mu i} x_i %\label{eq:}
+    \na{\mu}{0} \equiv \delta_{0\mu}+ x_i\delta_{i\mu}  %\label{eq:}
 \end{equation}
 
 \begin{equation}
     \na{\mu}{l} \equiv \delta_{\mu0} +\delta_{\mu i }^{[l]}\,\,
-    \ff{g^{[l]}}{  \nt{i}{\nu}{l}\na{\nu }{l-1}  } , \,\,\,\, l<L %\label{eq:} , 
+    \ff{g^{[l]}}{\na{\nu }{l-1} \nt{\nu}{i}{l}  } , \,\,\,\, l<L %\label{eq:} ,
 \end{equation}
 
 \begin{equation}
-    \nz{i}{l}\equiv \nt{i}{\nu}{l}\na{\nu }{l-1} ,\,\,\,\, l\le L %\label{eq:} 
+    \nz{i}{l}\equiv \na{\nu }{l-1} \nt{\nu}{i}{l} ,\,\,\,\, l\le L %\label{eq:}
 \end{equation}
 
 \begin{align}
  \hat{y}_i \equiv   \frac{e^{\nz{i}{L}} } {\sum_c e^{\nz{c}{L} }}
 \end{align}
 
-It should be understood that in $\na{i}{l}$ 
-one has  $i \in \{1,..., s_l\} $, 
+It should be understood that in $\na{i}{l}$
+one has  $i \in \{1,..., s_l\} $,
 and that in $\na{\mu}{l}$ one has $ \mu \in \{0,..., s_l\}$. The loss function is
 
 \begin{equation}
-    J\equiv -\sum_i y_i \ff{\log}{\hat{y}_i }  
+    J\equiv -\sum_i y_i \ff{\log}{\hat{y}_i }
 \end{equation}
 
 \section{Back propagation}
@@ -315,15 +216,15 @@ and that in $\na{\mu}{l}$ one has $ \mu \in \{0,..., s_l\}$. The loss function i
 The following recursion relations do the job
 \begin{equation}
     \underbrace{
-    \frac{\partial J }{\partial  \nt{j_l}{j_{l-1}}{l}  }
-    }_{\dd  \nt{j_l}{j_{l-1}}{l} } 
+    \frac{\partial J }{\partial  \nt{j_{l-1}}{j_{l}}{l}  }
+    }_{\dd  \nt{j_{l-1}}{j_l}{l} }
    =
+   \underbrace{
+    \frac{\partial \nz{j_l}{l} }{\partial \nt{j_{l-1}}{j_l}{l}  }
+    }_{ \na{j_{l-1}}{l-1} }
    \underbrace{
     \frac{\partial J  }{\partial \nz{j_l}{l} }
     }_{\dd  \nz{j_{l}}{l} }
-    \underbrace{
-    \frac{\partial \nz{j_l}{l} }{\partial \nt{j_l}{j_{l-1}}{l}  }
-    }_{ \na{j_{l-1}}{l-1} }
     %\label{eq:}
 \end{equation}
 
@@ -334,42 +235,41 @@ The following recursion relations do the job
 \frac{\partial J  }{\partial \nz{j_l}{l}   }
 }_{\dd  \nz{j_{l}}{l} }
 	=
-	\underbrace{ 
-	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   } 
-	\frac{\partial \nz{j_{l+1}}{l+1}   }{ \partial \na{j_{l}}{l}  }
+	\underbrace{
+	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   }
+	\frac{\partial \nz{j_{l+1}}{l+1}}{\partial \na{j_{l}}{l}}
 	}_{\dd a_{j_l}^{[l]} }
 	\frac{\partial \na{j_{l}}{l}    }{ \partial \nz{j_{l}}{l}  }
 	=
 	\underbrace{
-	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   } 
-	 \nt{j_{l+1}}{j_l}{l+1}
-	 }_{ \dd a_{j_l}^{[l]}=(\theta^{[l+1]T})_{j_l j_{l+1}} \dd z_{j_{l+1}}^{[l+1]} }
+	\frac{\partial J  }{\partial \nz{j_{l+1}}{l+1}   }
+	 \nt{j_l}{j_{l+1}}{l+1}
+	 }_{ \dd a_{j_l}^{[l]}=\theta^{[l+1]}_{j_l j_{l+1}} \dd z_{j_{l+1}}^{[l+1]} }
 	 g^{[l]'}\left( z_{j_{l}}^{[l]}   \right)
 \end{equation}
 
 Hence, in an abbreviated notation one has:
 \begin{eqnarray}
-	&\dd  \nt{j_l}{j_{l-1}}{l} = \dd  \nz{j_{l}}{l}  \na{j_{l-1}}{l-1}\\
-	&\dd a_{j_{l-1}}^{[l-1]}=(\theta^{[l]T})_{j_{l-1} j_{l}} \dd z_{j_{l}}^{[l]}\\
+	&\dd  \nt{j_{l-1}}{j_l}{l} = \dd  \nz{j_{l}}{l}  \na{j_{l-1}}{l-1}\\
+	&\dd a_{j_{l}}^{[l]}=\theta^{[l+1]}_{j_{l} j_{l+1}} \dd z_{j_{l+1}}^{[l+1]}\\
 	&\dd  \nz{j_{l}}{l}= \dd a_{j_l}^{[l]} \,\, g^{[l]'}\left( z_{j_{l}}^{[l]}   \right)
 \end{eqnarray}
 
-Hence, by providing $\{ \dd a^{[l]}  , \theta^{[l]}\}$ one gets $\{ \dd  \nt{j_l}{\mu}{l}, \dd a_{j_{l-1}}^{[l-1]}\}$ and this process can be iterated. 
-The initial condition is
+The initial condition is ($\hat{y_i} = g(z_i)$)
 \begin{eqnarray}
-    &\dd \theta^{[L]}_{j_L j_{L-1}}= \frac{\partial J }{\partial  \nt{j_L}{\mu}{L}  } =
+    &\dd \theta^{[L]}_{ j_{L-1} j_L}= \frac{\partial J }{\partial  \nt{j_{L-1}}{j_{L}}{L}  } =
    \left( -  \frac{y_i }{ \hat{y}_i} \right)
    \left(  \frac{ \partial \hat{y}_i}{\partial z_{j_L}^{[L]} }    \right)
-   \left(   \frac{ \partial z_{j_L}^{[L]} } {\partial  \nt{j_L}{j_{L-1}}{L}  }  \right) 
+   \left(   \frac{ \partial z_{j_L}^{[L]} } {\partial  \nt{j_{L-1}}{j_L}{L}  }  \right)
    \label{eq:softmaxp1}
 \end{eqnarray}
 
 \begin{align}
- \frac{ \partial \hat{y}_i}{\partial z_{j_L}^{[L]} } =\hat{y}_i(  \delta_{i j_L} -   \hat{y}_{j_L}) 
+ \frac{ \partial \hat{y}_i}{\partial z_{j_L}^{[L]} } =\hat{y}_i(  \delta_{i j_L} -   \hat{y}_{j_L})
  \label{eq:softmaxp2}
 \end{align}
 \begin{align}
-\frac{ \partial z_{j_L}^{[L]} } {\partial  \nt{j_L}{j_{L-1}}{L}  }  =  a^{L-1}_{j_{L-1}}
+\frac{ \partial z_{j_L}^{[L]} } {\partial  \nt{j_{L-1}}{j_L}{L}  }  =  a^{L-1}_{j_{L-1}}
 \label{eq:softmaxp3}
 \end{align}
 Note that after summing over $i$, the first two terms in \eqref{eq:softmaxp1} simplify as:
@@ -380,157 +280,6 @@ Note that after summing over $i$, the first two terms in \eqref{eq:softmaxp1} si
 
 *******************************************************
 
-\section{Old, don't look!}
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Machine Learning coursera Andrew NG}
-
-In the lectures notes, one has 
-$\theta^{[l]}_{\text{here}}=\theta^{[l-1]}_{\text{there}}$.
-We do this change to make the connexion with the 
-deep learning specialization lectures.
-
-\begin{equation}
-    \na{\mu}{0} \equiv \delta_{\mu0}+\delta_{\mu i} x_i %\label{eq:}
-\end{equation}
-
-\begin{equation}
-    \na{\mu}{l} \equiv \delta_{\mu0} +\delta_{\mu i }^{[l]}\,\,
-    \ff{g^{[l]}}{  \nt{i}{\nu}{l}\na{\nu }{l-1}  }  %\label{eq:}
-\end{equation}
-
-\begin{equation}
-    \nz{i}{l}\equiv \nt{i}{\nu}{l}\na{\nu }{l} %\label{eq:}
-\end{equation}
-
-
-
-It should be understood that in $\na{i}{l}$ 
-one has  $i \in \{1,..., s_l\} $, 
-and that in $\na{\mu}{l}$ one has $ \mu \in \{0,..., s_l\}$.
-
-
-The cost fucntion has the structure
-
-\begin{equation}
-    cost=\frac1m \sum^m_n 
-    J \Big\vert_{x=x_n,y=y_n}  %\label{eq:}
-\end{equation}
-where
-
-\begin{equation}
-    J\equiv -\sum^{s_L}_k
-    \left(
-        y_k\ff{\log}{\na{k}{L}}  %\label{eq:}
-        +(1-y_k)\ff{\log}{1-\na{k}{L}} 
-    \right)
-\end{equation}
-
-To implement gradient descent we need 
-the next partial derivatives ($l\in\{1,...,L\} $)
-
-\begin{equation}
-    \frac{\partial J }{\partial  \nt{j_l}{\mu}{l}  } 
-%    = 
-%    \frac{\partial J  }{\partial \na{j_L}{L}  }
-%    \left(
-%    \frac{\partial \na{j_L}{L}  }{\partial \na{j_{L-1}}{L-1}  }
-%    \cdots
-%    \frac{\partial \na{j_{l+1}}{l+1}   }{\partial \na{j_{l}}{l}   }
-%    \right)
-%     \frac{\partial \na{j_{l}}{l}   }{\partial \nz{j_{l}}{l}   }
-%    \frac{\partial \nz{j_{l}}{l} 
-%    %\left(
-%    %   \nt{j_{l}}{\nu}{l} \na{\nu}{l-1}
-%    % \right)
-%                }
-%        {\partial \nt{i}{\mu}{l}  }\\
-   =\frac{\partial J  }{\partial \na{j_L}{L}  }
-    \left(
-    \frac{\partial \na{j_L}{L}  }{\partial \na{j_{L-1}}{L-1}  }
-    \cdots
-    \frac{\partial \na{j_{l+1}}{l+1}   }{\partial \na{j_l}{l}   }
-    \right)
-    \frac{\partial \na{j_l}{l}   }{\partial \nz{j_l}{l}   }
-    \frac{\partial \nz{j_l}{l} }
-        {\partial \nt{j_l}{\mu}{l}  }
-    %\label{eq:}
-\end{equation}
-through simple partial derivation one can show that 
-
-\begin{equation}
-    \frac{\partial J  }{\partial \na{j_L}{L}  }
-    = \frac{(\na{j_L}{L} -y_{j_L})}{\na{j_L}{L} (1-\na{j_L}{L} )} 
-    %a^{[L]'}_{j_L}  %\label{eq:}
-\end{equation}
-
-
-\begin{equation}
-  \frac{\partial \nz{j_l}{l}  }
-        {\partial \nt{j_l}{\mu}{l}  }
-        =  \na{\mu}{l-1}
-    %\label{eq:}
-\end{equation}
-
-\begin{equation}
-    \frac{\partial \na{j_l}{l}  }
-    {\partial \na{j_{l-1}}{l-1}  }
-    =
-   \left( \frac{\partial \na{j_l}{l}}   {\partial \nz{j_{l}}{l}  }\right)
-   \left( \frac{\partial \nz{j_{l}}{l} }   {\partial \na{j_{l-1}}{l-1}  }\right)
-    = \left( a^{[l]'}_{j_{l} }\right)
-    \, \left( \nt{j_l}{j_{l-1}}{l} \right)
-     %\label{eq:}
-\end{equation}
-
-\begin{equation}
-	\frac{\partial \na{j_{l}}{l}   }{\partial \nz{j_{l}}{l}   } =  a_{j_{l}}^{[l]'}
-\end{equation} 
-
-Then, we can write
-\begin{equation}
-    \frac{\partial J }{\partial  \nt{j_l}{\mu}{l}  } =
-    \frac{(\na{j_L}{L} -y_{j_L})}{\na{j_L}{L} (1-\na{j_L}{L-1} )} 
-    \left(
-    \frac{\partial \na{j_L}{L}  }{\partial \na{j_{L-1}}{L-1}  }
-    \cdots\frac{\partial \na{j_{l+1}}{l+1}   }{\partial \na{j_{l}}{l}   } 
-    \right) a_{j_{l}}^{[l]'} 
-   \, \na{\mu}{l-1} 
-    %\label{eq:}
-\end{equation}
-
-\section{Recursion relation}
-Let us write
-\begin{equation}
-    \frac{\partial J }{\partial  \nt{j_l}{\mu}{l}  } 
-   =\frac{\partial J  }{\partial \na{j_l}{l}   }
-    \frac{\partial \na{j_l}{l}   }{\partial \nz{j_l}{l}   }
-    \frac{\partial \nz{j_l}{l} }
-        {\partial \nt{j_l}{\mu}{l}  }
-    %\label{eq:}
-\end{equation}
-since 
-\begin{equation}
-\frac{\partial J  }{\partial \na{j_l}{l}   }
-= \frac{\partial J  }{\partial \na{j_{l+1}}{l+1}   } \frac{\partial \na{j_{l+1}}{l+1}   }{ \partial \na{j_{l}}{l}  }
-= \frac{\partial J  }{\partial \na{j_{l+1}}{l+1}   } 
-  \left( \frac{\partial \na{j_{l+1}}{l+1}}   {\partial \nz{j_{l+1}}{l+1}  }\right)
-   \left( \frac{\partial \nz{j_{l+1}}{l+1} }   {\partial \na{j_{l}}{l}  }\right)
-=\frac{\partial J  }{\partial \na{j_{l+1}}{l+1}   } a^{[l+1]'}_{j_{l+1} }  \nt{j_{l+1}}{j_{l}}{l+1}
-\end{equation}
-In Andrew's program they use the following notation:
-\begin{equation}
-\underbrace{\frac{\partial J  }{\partial \na{j_l}{l}   }}_{\dd z_{j_l}^{[l]} }
-=\underbrace{\nt{j_{l+1}}{j_{l}}{l+1} \frac{\partial J  }{\partial \na{j_{l+1}}{l+1}   }   }
-_{ \dd a_{j_{l}}^{[l]}  =  (\theta^{[l+1]T} )_{j_{l} j_{l+1}}   \dd z_{j_{l+1}}^{[l+1]}  } 
-a^{[l+1]'}_{j_{l+1} }
-\end{equation}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
